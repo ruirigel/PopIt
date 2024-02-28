@@ -11,6 +11,9 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
+
+    private var timer: CountDownTimer? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -173,15 +176,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun generate() {
-        val buttonIds = arrayOf(R.id.button20, R.id.button21, R.id.button22,R.id.button23, R.id.button24, R.id.button25, R.id.button26, R.id.button27, R.id.button28, R.id.button29, R.id.button30, R.id.button31,R.id.button32,R.id.button33,R.id.button34,R.id.button35,R.id.button36,R.id.button37)
+        val buttonIds = arrayOf(
+            R.id.button20,
+            R.id.button21,
+            R.id.button22,
+            R.id.button23,
+            R.id.button24,
+            R.id.button25,
+            R.id.button26,
+            R.id.button27,
+            R.id.button28,
+            R.id.button29,
+            R.id.button30,
+            R.id.button31,
+            R.id.button32,
+            R.id.button33,
+            R.id.button34,
+            R.id.button35,
+            R.id.button36,
+            R.id.button37
+        )
         for (i in 0..17) {
             val buttons = findViewById<Button>(buttonIds[i])
             buttons.setBackgroundColor(Color.parseColor("#3F51B4"))
             buttons.isEnabled = true
             buttons.isClickable = true
-            val btnClick38 = findViewById<Button>(R.id.button38)
-            btnClick38.isEnabled = false
-            btnClick38.isClickable = false
+            timer?.cancel()
+            timer = null;
             mcountdown()
         }
         val min = 0
@@ -204,20 +225,38 @@ class MainActivity : AppCompatActivity() {
 
     fun mcountdown() {
         val btnClick38 = findViewById<Button>(R.id.button38)
-        object : CountDownTimer(4000, 1000) {
+        timer = object : CountDownTimer(4000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 btnClick38.setText("" + millisUntilFinished / 1000)
             }
+
             override fun onFinish() {
-                val buttonIds = arrayOf(R.id.button20, R.id.button21, R.id.button22,R.id.button23, R.id.button24, R.id.button25, R.id.button26, R.id.button27, R.id.button28, R.id.button29, R.id.button30, R.id.button31,R.id.button32,R.id.button33,R.id.button34,R.id.button35,R.id.button36,R.id.button37)
+                val buttonIds = arrayOf(
+                    R.id.button20,
+                    R.id.button21,
+                    R.id.button22,
+                    R.id.button23,
+                    R.id.button24,
+                    R.id.button25,
+                    R.id.button26,
+                    R.id.button27,
+                    R.id.button28,
+                    R.id.button29,
+                    R.id.button30,
+                    R.id.button31,
+                    R.id.button32,
+                    R.id.button33,
+                    R.id.button34,
+                    R.id.button35,
+                    R.id.button36,
+                    R.id.button37
+                )
                 for (i in 0..17) {
                     val buttons = findViewById<Button>(buttonIds[i])
                     buttons.isEnabled = false
                     buttons.isClickable = false
+                    btnClick38.setText("")
                 }
-                btnClick38.isEnabled = true
-                btnClick38.isClickable = true
-                btnClick38.setText(" Try Again")
             }
         }.start()
     }
