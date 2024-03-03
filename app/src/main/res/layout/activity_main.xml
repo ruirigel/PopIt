@@ -208,7 +208,7 @@
         android:layout_marginEnd="42dp"
         android:backgroundTint="#3F51B4"
         android:tag="38"
-        android:textColor="#FEFEFE"
+        android:textColor="#00FE01"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button35" />

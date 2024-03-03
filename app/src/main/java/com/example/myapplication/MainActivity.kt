@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.Context
 import android.graphics.Color
 import android.media.MediaPlayer
 import android.os.Build
@@ -7,18 +8,32 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.widget.Button
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
+import java.time.LocalDateTime
+
 
 class MainActivity : AppCompatActivity() {
 
     private var timer: CountDownTimer? = null
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         window.statusBarColor = resources.getColor(R.color.statusBarColor)
+
+        val tm = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        val countryCodeValue = tm.networkCountryIso
+        save_country_code(countryCodeValue)
+
+        val ldt = LocalDateTime.now().toString()
+        save_date_time(ldt)
 
         generate()
 
@@ -201,9 +216,6 @@ class MainActivity : AppCompatActivity() {
             buttons.setBackgroundColor(Color.parseColor("#3F51B4"))
             buttons.isEnabled = true
             buttons.isClickable = true
-            timer?.cancel()
-            timer = null;
-            mcountdown()
         }
         val min = 0
         val max = 17
@@ -212,6 +224,9 @@ class MainActivity : AppCompatActivity() {
             val buttons = findViewById<Button>(buttonIds[number])
             buttons.setBackgroundColor(Color.GREEN)
         }
+        timer?.cancel()
+        timer = null;
+        mcountdown()
     }
 
     fun vibratePhone() {
@@ -224,11 +239,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun mcountdown() {
-        //
+        var countseconds = 1
         val btnClick38 = findViewById<Button>(R.id.button38)
         timer = object : CountDownTimer(4000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 btnClick38.setText("" + millisUntilFinished / 1000)
+                countseconds++
             }
 
             override fun onFinish() {
@@ -260,5 +276,39 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }.start()
+    }
+
+    fun save_times(arg1: String) {
+        val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        val database = Firebase.database
+        val myRef = database.getReference(id)
+        val b = myRef.child("times").get()
+        //val result = b + arg1
+        //myRef.child("times").setValue(result)
+
+    }
+
+    fun save_date_time(arg1: String) {
+        val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        val database = Firebase.database
+        val myRef = database.getReference(id)
+        myRef.child("date").setValue(arg1)
+
+    }
+
+    fun save_country_code(arg1: String) {
+        val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        val database = Firebase.database
+        val myRef = database.getReference(id)
+        myRef.child("country").setValue(arg1)
+
+    }
+
+    fun save_score(arg1: String) {
+        val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        val database = Firebase.database
+        val myRef = database.getReference(id)
+        myRef.child("score").setValue(arg1)
+
     }
 }
