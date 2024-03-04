@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.graphics.Color
 import android.media.MediaPlayer
@@ -10,17 +11,30 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
 import android.telephony.TelephonyManager
+import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
 import java.time.LocalDateTime
 
 
 class MainActivity : AppCompatActivity() {
 
     private var timer: CountDownTimer? = null
+    private lateinit var database: DatabaseReference
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,11 +44,11 @@ class MainActivity : AppCompatActivity() {
 
         val tm = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         val countryCodeValue = tm.networkCountryIso
-        save_country_code(countryCodeValue)
-
+        savecountrycode(countryCodeValue)
         val ldt = LocalDateTime.now().toString()
-        save_date_time(ldt)
-
+        savedatetime(ldt)
+        getpublicipaddress()
+        savetimes()
         generate()
 
         val btnClick20 = findViewById<Button>(R.id.button20)
@@ -225,26 +239,17 @@ class MainActivity : AppCompatActivity() {
             buttons.setBackgroundColor(Color.GREEN)
         }
         timer?.cancel()
-        timer = null;
+        timer = null
+        savescore()
         mcountdown()
     }
 
-    fun vibratePhone() {
-        val v = getSystemService(VIBRATOR_SERVICE) as Vibrator
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            v.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            v.vibrate(100)
-        }
-    }
-
     fun mcountdown() {
-        var countseconds = 1
         val btnClick38 = findViewById<Button>(R.id.button38)
         timer = object : CountDownTimer(4000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                btnClick38.setText("" + millisUntilFinished / 1000)
-                countseconds++
+                btnClick38.text = "" + millisUntilFinished / 1000
+
             }
 
             override fun onFinish() {
@@ -272,23 +277,31 @@ class MainActivity : AppCompatActivity() {
                     val buttons = findViewById<Button>(buttonIds[i])
                     buttons.isEnabled = false
                     buttons.isClickable = false
-                    btnClick38.setText("")
+                    //btnClick38.text = ""
                 }
             }
         }.start()
     }
 
-    fun save_times(arg1: String) {
+    fun savetimes() {
         val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         val database = Firebase.database
         val myRef = database.getReference(id)
-        val b = myRef.child("times").get()
-        //val result = b + arg1
-        //myRef.child("times").setValue(result)
+        myRef.child("times").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val timesvalue = snapshot.value.toString()
+                Log.d(TAG, timesvalue)
+                val result = timesvalue + 1
+                myRef.child("times").setValue(result)
+            }
+            override fun onCancelled(error: DatabaseError) {
+                // Handle any errors or cancellation
+            }
+        })
 
     }
 
-    fun save_date_time(arg1: String) {
+    fun savedatetime(arg1: String) {
         val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         val database = Firebase.database
         val myRef = database.getReference(id)
@@ -296,7 +309,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun save_country_code(arg1: String) {
+    fun savecountrycode(arg1: String) {
         val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         val database = Firebase.database
         val myRef = database.getReference(id)
@@ -304,11 +317,51 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun save_score(arg1: String) {
+    fun savescore() {
+        val btnClick38 = findViewById<Button>(R.id.button38)
         val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         val database = Firebase.database
         val myRef = database.getReference(id)
-        myRef.child("score").setValue(arg1)
+        myRef.child("score").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val scorevalue = snapshot.value.toString()
+                Log.d(TAG, scorevalue)
+                val result = scorevalue + btnClick38.text.toString()
+                myRef.child("score").setValue(result)
+            }
+            override fun onCancelled(error: DatabaseError) {
+                // Handle any errors or cancellation
+            }
+        })
+    }
 
+    fun getpublicipaddress() {
+        val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        val url = "https://api.ipify.org/"
+        Thread {
+            try {
+                val connection = URL(url).openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                val inputStream = connection.inputStream
+                val reader = BufferedReader(InputStreamReader(inputStream))
+                val publicIP = reader.readLine()
+                reader.close()
+                val database = Firebase.database
+                val myRef = database.getReference(id)
+                myRef.child("address").setValue(publicIP)
+            } catch (e: IOException) {
+                e.printStackTrace()
+                Toast.makeText(this, "No internet connection?", Toast.LENGTH_SHORT).show()
+            }
+        }.start()
+    }
+
+    fun vibratePhone() {
+        val v = getSystemService(VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            v.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            v.vibrate(100)
+        }
     }
 }
