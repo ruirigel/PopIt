@@ -199,6 +199,9 @@ class MainActivity : AppCompatActivity() {
             vibratePhone()
             generate()
             btnClick38.setBackgroundColor(Color.parseColor("#3F51B4"))
+            val num = btnClick38.text.toString()
+            savescore(num)
+
         }
     }
 
@@ -238,7 +241,6 @@ class MainActivity : AppCompatActivity() {
         }
         timer?.cancel()
         timer = null
-        savescore()
         mcountdown()
     }
 
@@ -247,7 +249,6 @@ class MainActivity : AppCompatActivity() {
         timer = object : CountDownTimer(4000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 btnClick38.text = "" + millisUntilFinished / 1000
-
             }
 
             override fun onFinish() {
@@ -316,8 +317,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun savescore() {
-        val btnClick38 = findViewById<Button>(R.id.button38)
+    fun savescore(arg1: String) {
         val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         val database = Firebase.database
         val myRef = database.getReference(id)
@@ -325,9 +325,8 @@ class MainActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val scorevalue = snapshot.value.toString()
                 val numa: Int = scorevalue.toInt()
-                val numb = btnClick38.text.toString()
-                val numc: Int = numb.toInt()
-                val result = numa + numc
+                val numb: Int = arg1.toInt()
+                val result = numa + numb
                 myRef.child("score").setValue(result)
             }
 
