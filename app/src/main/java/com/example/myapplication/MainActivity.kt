@@ -1,6 +1,5 @@
 package com.example.myapplication
 
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.graphics.Color
 import android.media.MediaPlayer
@@ -11,7 +10,6 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
 import android.telephony.TelephonyManager
-import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -290,10 +288,11 @@ class MainActivity : AppCompatActivity() {
         myRef.child("times").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val timesvalue = snapshot.value.toString()
-                Log.d(TAG, timesvalue)
-                val result = timesvalue + 1
+                val num: Int = timesvalue.toInt()
+                val result = num + 1
                 myRef.child("times").setValue(result)
             }
+
             override fun onCancelled(error: DatabaseError) {
                 // Handle any errors or cancellation
             }
@@ -325,10 +324,13 @@ class MainActivity : AppCompatActivity() {
         myRef.child("score").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val scorevalue = snapshot.value.toString()
-                Log.d(TAG, scorevalue)
-                val result = scorevalue + btnClick38.text.toString()
+                val numa: Int = scorevalue.toInt()
+                val numb = btnClick38.text.toString()
+                val numc: Int = numb.toInt()
+                val result = numa + numc
                 myRef.child("score").setValue(result)
             }
+
             override fun onCancelled(error: DatabaseError) {
                 // Handle any errors or cancellation
             }
