@@ -3,6 +3,8 @@ package com.example.myapplication
 import android.content.Context
 import android.graphics.Color
 import android.media.MediaPlayer
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -10,13 +12,15 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
 import android.telephony.TelephonyManager
+import android.text.InputType
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -31,8 +35,6 @@ import java.time.LocalDateTime
 class MainActivity : AppCompatActivity() {
 
     private var timer: CountDownTimer? = null
-    private lateinit var database: DatabaseReference
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,13 +42,22 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         window.statusBarColor = resources.getColor(R.color.statusBarColor)
 
-        val tm = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        val countryCodeValue = tm.networkCountryIso
-        savecountrycode(countryCodeValue)
-        val ldt = LocalDateTime.now().toString()
-        savedatetime(ldt)
-        getpublicipaddress()
-        savetimes()
+        if (isonline(this)) {
+            val tm = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            val countryCodeValue = tm.networkCountryIso
+            savecountrycode(countryCodeValue)
+            val ldt = LocalDateTime.now().toString()
+            savedatetime(ldt)
+            getpublicipaddress()
+            devicename()
+            savetimes()
+            askforusername()
+        } else {
+            Toast.makeText(this, "No internet connection?", Toast.LENGTH_SHORT).show()
+        }
+
+        val mp = MediaPlayer.create(this, R.raw.popitreset)
+        mp.start()
         generate()
 
         val btnClick20 = findViewById<Button>(R.id.button20)
@@ -283,78 +294,85 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun savetimes() {
-        val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-        val database = Firebase.database
-        val myRef = database.getReference(id)
-        myRef.child("times").addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val timesvalue = snapshot.value.toString()
-                val num: Int = timesvalue.toInt()
-                val result = num + 1
-                myRef.child("times").setValue(result)
-            }
+        if (isonline(this)) {
+            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            val database = Firebase.database
+            val myRef = database.getReference(id)
+            myRef.child("times").addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val timesvalue = snapshot.value.toString()
+                    val num: Int = timesvalue.toInt()
+                    val result = num + 1
+                    myRef.child("times").setValue(result)
+                }
 
-            override fun onCancelled(error: DatabaseError) {
-                // Handle any errors or cancellation
-            }
-        })
-
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle any errors or cancellation
+                }
+            })
+        }
     }
 
     fun savedatetime(arg1: String) {
-        val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-        val database = Firebase.database
-        val myRef = database.getReference(id)
-        myRef.child("date").setValue(arg1)
-
+        if (isonline(this)) {
+            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            val database = Firebase.database
+            val myRef = database.getReference(id)
+            myRef.child("date").setValue(arg1)
+        }
     }
 
     fun savecountrycode(arg1: String) {
-        val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-        val database = Firebase.database
-        val myRef = database.getReference(id)
-        myRef.child("country").setValue(arg1)
-
+        if (isonline(this)) {
+            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            val database = Firebase.database
+            val myRef = database.getReference(id)
+            myRef.child("country").setValue(arg1)
+        }
     }
 
     fun savescore(arg1: String) {
-        val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-        val database = Firebase.database
-        val myRef = database.getReference(id)
-        myRef.child("score").addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val scorevalue = snapshot.value.toString()
-                val numa: Int = scorevalue.toInt()
-                val numb: Int = arg1.toInt()
-                val result = numa + numb
-                myRef.child("score").setValue(result)
-            }
+        if (isonline(this)) {
+            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            val database = Firebase.database
+            val myRef = database.getReference(id)
+            myRef.child("score").addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val scorevalue = snapshot.value.toString()
+                    val numa: Int = scorevalue.toInt()
+                    val numb: Int = arg1.toInt()
+                    val result = numa + numb
+                    myRef.child("score").setValue(result)
+                }
 
-            override fun onCancelled(error: DatabaseError) {
-                // Handle any errors or cancellation
-            }
-        })
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle any errors or cancellation
+                }
+            })
+        }
     }
 
     fun getpublicipaddress() {
-        val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-        val url = "https://api.ipify.org/"
-        Thread {
-            try {
-                val connection = URL(url).openConnection() as HttpURLConnection
-                connection.requestMethod = "GET"
-                val inputStream = connection.inputStream
-                val reader = BufferedReader(InputStreamReader(inputStream))
-                val publicIP = reader.readLine()
-                reader.close()
-                val database = Firebase.database
-                val myRef = database.getReference(id)
-                myRef.child("address").setValue(publicIP)
-            } catch (e: IOException) {
-                e.printStackTrace()
-                Toast.makeText(this, "No internet connection?", Toast.LENGTH_SHORT).show()
-            }
-        }.start()
+        if (isonline(this)) {
+            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            val url = "https://api.ipify.org/"
+            Thread {
+                try {
+                    val connection = URL(url).openConnection() as HttpURLConnection
+                    connection.requestMethod = "GET"
+                    val inputStream = connection.inputStream
+                    val reader = BufferedReader(InputStreamReader(inputStream))
+                    val publicIP = reader.readLine()
+                    reader.close()
+                    val database = Firebase.database
+                    val myRef = database.getReference(id)
+                    myRef.child("address").setValue(publicIP)
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    Toast.makeText(this, "No internet connection?", Toast.LENGTH_SHORT).show()
+                }
+            }.start()
+        }
     }
 
     fun vibratePhone() {
@@ -364,5 +382,58 @@ class MainActivity : AppCompatActivity() {
         } else {
             v.vibrate(100)
         }
+    }
+
+    fun devicename() {
+        if (isonline(this)) {
+            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            val database = Firebase.database
+            val myRef = database.getReference(id)
+            val device = Build.MODEL
+            myRef.child("device").setValue(device)
+        }
+    }
+
+    fun askforusername() {
+        if (isonline(this)) {
+            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            val database = Firebase.database
+            val myRef = database.getReference(id)
+            var mText = ""
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("First time")
+            builder.setMessage("Do you want join in global scoreboard?\nPlease write a username below.")
+            val input = EditText(this)
+            input.inputType = InputType.TYPE_CLASS_TEXT
+            builder.setView(input)
+            builder.setPositiveButton("OK") { dialog, _ ->
+                mText = input.text.toString()
+                myRef.child("name").setValue(mText)
+            }
+            builder.setNegativeButton("Cancel") { dialog, _ ->
+                myRef.child("name").setValue("guest")
+                dialog.cancel()
+            }
+            builder.show()
+        }
+    }
+
+    fun isonline(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (connectivityManager != null) {
+            val capabilities =
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            if (capabilities != null) {
+                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                    return true
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                    return true
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                    return true
+                }
+            }
+        }
+        return false
     }
 }
