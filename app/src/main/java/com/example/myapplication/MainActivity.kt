@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
             getpublicipaddress()
             devicename()
             savetimes()
-            askforusername()
+            firsttime()
         } else {
             Toast.makeText(this, "No internet connection?", Toast.LENGTH_SHORT).show()
         }
@@ -305,7 +305,6 @@ class MainActivity : AppCompatActivity() {
                     val result = num + 1
                     myRef.child("times").setValue(result)
                 }
-
                 override fun onCancelled(error: DatabaseError) {
                     // Handle any errors or cancellation
                 }
@@ -344,7 +343,6 @@ class MainActivity : AppCompatActivity() {
                     val result = numa + numb
                     myRef.child("score").setValue(result)
                 }
-
                 override fun onCancelled(error: DatabaseError) {
                     // Handle any errors or cancellation
                 }
@@ -394,12 +392,29 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun firsttime() {
+        if (isonline(this)) {
+            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            val database = Firebase.database
+            val myRef = database.getReference(id)
+            myRef.child("name").addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (!snapshot.exists()) {
+                        askforusername()
+                    }
+                }
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle any errors or cancellation
+                }
+            })
+        }
+    }
+
     fun askforusername() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
             val myRef = database.getReference(id)
-            var mText = ""
             val builder = AlertDialog.Builder(this)
             builder.setTitle("First time")
             builder.setMessage("Do you want join in global scoreboard?\nPlease write a username below.")
@@ -407,7 +422,7 @@ class MainActivity : AppCompatActivity() {
             input.inputType = InputType.TYPE_CLASS_TEXT
             builder.setView(input)
             builder.setPositiveButton("OK") { dialog, _ ->
-                mText = input.text.toString()
+                val mText = input.text.toString()
                 myRef.child("name").setValue(mText)
             }
             builder.setNegativeButton("Cancel") { dialog, _ ->
