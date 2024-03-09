@@ -33,6 +33,7 @@ import java.net.URL
 import java.time.LocalDateTime
 
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     private var timer: CountDownTimer? = null
@@ -227,7 +228,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun generate() {
+    private fun generate() {
         val buttonIds = arrayOf(
             R.id.button20,
             R.id.button21,
@@ -267,11 +268,11 @@ class MainActivity : AppCompatActivity() {
         mcountdown()
     }
 
-    fun mcountdown() {
+    private fun mcountdown() {
         val btnClick38 = findViewById<Button>(R.id.button38)
         timer = object : CountDownTimer(4000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                btnClick38.text = "" + millisUntilFinished / 1000
+                btnClick38.text = (millisUntilFinished / 1000).toString()
             }
 
             override fun onFinish() {
@@ -305,7 +306,7 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
-    fun savetimes() {
+    private fun savetimes() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
@@ -325,7 +326,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun savedatetime(arg1: String) {
+    private fun savedatetime(arg1: String) {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
@@ -334,7 +335,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun savecountrycode(arg1: String) {
+    private fun savecountrycode(arg1: String) {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
@@ -343,7 +344,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun savescore(arg1: String) {
+    private fun savescore(arg1: String) {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
@@ -365,7 +366,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun showscore() {
+    private fun showscore() {
         if (isonline(this)) {
             val rootRef = FirebaseDatabase.getInstance().reference
             val usersRef = rootRef.child("data")
@@ -378,9 +379,9 @@ class MainActivity : AppCompatActivity() {
                     var names = arrayOf<String>()
                     val namesList = names.toMutableList()
                     var c = 1
-                    var nameb = ""
-                    var countryb = ""
-                    var scoreb = ""
+                    var nameb: String
+                    var countryb: String
+                    var scoreb: String
                     for (userSnapshot in snapshot.children) {
                         val name = userSnapshot.child("name").getValue(String::class.java)
                         val country = userSnapshot.child("country").getValue(String::class.java)
@@ -394,7 +395,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     names = namesList.toTypedArray()
-                    builder.setItems(names) { dialog, which ->
+                    builder.setItems(names) { _, which ->
                         when (which) {
                             0 -> {
                             }
@@ -442,7 +443,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun getpublicipaddress() {
+    private fun getpublicipaddress() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val url = "https://api.ipify.org/"
@@ -465,7 +466,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun vibratePhone() {
+    private fun vibratePhone() {
         val v = getSystemService(VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             v.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
@@ -474,7 +475,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun devicename() {
+    private fun devicename() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
@@ -484,7 +485,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun firsttime() {
+    private fun firsttime() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
@@ -514,7 +515,7 @@ class MainActivity : AppCompatActivity() {
             val input = EditText(this)
             input.inputType = InputType.TYPE_CLASS_TEXT
             builder.setView(input)
-            builder.setPositiveButton("OK") { dialog, _ ->
+            builder.setPositiveButton("OK") { _, _ ->
                 val mText = input.text.toString()
                 myRef.child("name").setValue(mText)
             }
@@ -526,20 +527,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun isonline(context: Context): Boolean {
+    private fun isonline(context: Context): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (connectivityManager != null) {
-            val capabilities =
-                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-            if (capabilities != null) {
-                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                    return true
-                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                    return true
-                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
-                    return true
-                }
+        val capabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        if (capabilities != null) {
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                return true
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                return true
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                return true
             }
         }
         return false
