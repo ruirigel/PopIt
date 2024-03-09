@@ -33,7 +33,6 @@ import java.net.URL
 import java.time.LocalDateTime
 
 
-@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     private var timer: CountDownTimer? = null
@@ -466,6 +465,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun vibratePhone() {
         val v = getSystemService(VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
