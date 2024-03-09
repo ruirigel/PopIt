@@ -21,6 +21,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -214,6 +215,16 @@ class MainActivity : AppCompatActivity() {
             savescore(num)
 
         }
+
+        val btnClick39 = findViewById<Button>(R.id.button39)
+        val mp39 = MediaPlayer.create(this, R.raw.popit)
+        btnClick39.setOnClickListener {
+            mp39.start()
+            vibratePhone()
+            showscore()
+            btnClick39.setBackgroundColor(Color.parseColor("#5587ED"))
+
+        }
     }
 
     fun generate() {
@@ -235,7 +246,8 @@ class MainActivity : AppCompatActivity() {
             R.id.button34,
             R.id.button35,
             R.id.button36,
-            R.id.button37
+            R.id.button37,
+            R.id.button39
         )
         for (i in 0..17) {
             val buttons = findViewById<Button>(buttonIds[i])
@@ -297,7 +309,7 @@ class MainActivity : AppCompatActivity() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
-            val myRef = database.getReference(id)
+            val myRef = database.getReference("/data/$id")
             myRef.child("times").addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val timesvalue = snapshot.value.toString()
@@ -305,6 +317,7 @@ class MainActivity : AppCompatActivity() {
                     val result = num + 1
                     myRef.child("times").setValue(result)
                 }
+
                 override fun onCancelled(error: DatabaseError) {
                     // Handle any errors or cancellation
                 }
@@ -316,7 +329,7 @@ class MainActivity : AppCompatActivity() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
-            val myRef = database.getReference(id)
+            val myRef = database.getReference("/data/$id")
             myRef.child("date").setValue(arg1)
         }
     }
@@ -325,7 +338,7 @@ class MainActivity : AppCompatActivity() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
-            val myRef = database.getReference(id)
+            val myRef = database.getReference("/data/$id")
             myRef.child("country").setValue(arg1)
         }
     }
@@ -334,17 +347,96 @@ class MainActivity : AppCompatActivity() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
-            val myRef = database.getReference(id)
+            val myRef = database.getReference("/data/$id")
             myRef.child("score").addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val scorevalue = snapshot.value.toString()
                     val numa: Int = scorevalue.toInt()
                     val numb: Int = arg1.toInt()
                     val result = numa + numb
-                    myRef.child("score").setValue(result)
+                    val finalresult = result.toString()
+                    myRef.child("score").setValue(finalresult)
                 }
+
                 override fun onCancelled(error: DatabaseError) {
                     // Handle any errors or cancellation
+                }
+            })
+        }
+    }
+
+    fun showscore() {
+        if (isonline(this)) {
+            val rootRef = FirebaseDatabase.getInstance().reference
+            val usersRef = rootRef.child("data")
+
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Global Score Board")
+
+            usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    var names = arrayOf<String>()
+                    val namesList = names.toMutableList()
+                    var c = 1
+                    var nameb = ""
+                    var countryb = ""
+                    var scoreb = ""
+                    for (userSnapshot in snapshot.children) {
+                        val name = userSnapshot.child("name").getValue(String::class.java)
+                        val country = userSnapshot.child("country").getValue(String::class.java)
+                        val score = userSnapshot.child("score").getValue(String::class.java)
+                        if (name != null && country != null && score != null) {
+                            nameb = name.toString().padStart(0, ' ')
+                            countryb = country.toString().padStart(0, ' ')
+                            scoreb = score.toString().padStart(35, ' ')
+                            namesList.add("$countryb - $nameb, $scoreb pts")
+                            c++
+                        }
+                    }
+                    names = namesList.toTypedArray()
+                    builder.setItems(names) { dialog, which ->
+                        when (which) {
+                            0 -> {
+                            }
+
+                            1 -> {
+                            }
+
+                            2 -> {
+                            }
+
+                            3 -> {
+                            }
+
+                            4 -> {
+                            }
+
+                            5 -> {
+                            }
+
+                            6 -> {
+                            }
+
+                            7 -> {
+                            }
+
+                            8 -> {
+                            }
+
+                            9 -> {
+                            }
+                        }
+                    }
+                    builder.setNegativeButton("") { dialog, _ ->
+                        dialog.cancel()
+                    }
+                    val dialog = builder.create()
+                    dialog.show()
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle database read error
+                    println("Error reading data: ${error.message}")
                 }
             })
         }
@@ -363,7 +455,7 @@ class MainActivity : AppCompatActivity() {
                     val publicIP = reader.readLine()
                     reader.close()
                     val database = Firebase.database
-                    val myRef = database.getReference(id)
+                    val myRef = database.getReference("/data/$id")
                     myRef.child("address").setValue(publicIP)
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -386,7 +478,7 @@ class MainActivity : AppCompatActivity() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
-            val myRef = database.getReference(id)
+            val myRef = database.getReference("/data/$id")
             val device = Build.MODEL
             myRef.child("device").setValue(device)
         }
@@ -396,13 +488,14 @@ class MainActivity : AppCompatActivity() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
-            val myRef = database.getReference(id)
+            val myRef = database.getReference("/data/$id")
             myRef.child("name").addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (!snapshot.exists()) {
                         askforusername()
                     }
                 }
+
                 override fun onCancelled(error: DatabaseError) {
                     // Handle any errors or cancellation
                 }
@@ -414,7 +507,7 @@ class MainActivity : AppCompatActivity() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
-            val myRef = database.getReference(id)
+            val myRef = database.getReference("/data/$id")
             val builder = AlertDialog.Builder(this)
             builder.setTitle("First time")
             builder.setMessage("Do you want join in global scoreboard?\nPlease write a username below.")
