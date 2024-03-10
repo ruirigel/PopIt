@@ -13,6 +13,7 @@ import android.os.Vibrator
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.text.InputType
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -313,9 +314,17 @@ class MainActivity : AppCompatActivity() {
             myRef.child("times").addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val timesvalue = snapshot.value.toString()
-                    val num: Int = timesvalue.toInt()
-                    val result = num + 1
-                    myRef.child("times").setValue(result)
+                    if (!timesvalue.isNullOrEmpty()) {
+                        try {
+                            val num: Int = timesvalue.toInt()
+                            val result = num + 1
+                            myRef.child("times").setValue(result)
+                        } catch (e: NumberFormatException) {
+                            Log.e("DetailsFragment", "Error parsing value: ${e.message}")
+                        }
+                    } else {
+                        Log.e("DetailsFragment", "Value string is empty or null")
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -351,11 +360,19 @@ class MainActivity : AppCompatActivity() {
             myRef.child("score").addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val scorevalue = snapshot.value.toString()
-                    val numa: Int = scorevalue.toInt()
-                    val numb: Int = arg1.toInt()
-                    val result = numa + numb
-                    val finalresult = result.toString()
-                    myRef.child("score").setValue(finalresult)
+                    if (!scorevalue.isNullOrEmpty()) {
+                        try {
+                            val numa: Int = scorevalue.toInt()
+                            val numb: Int = arg1.toInt()
+                            val result = numa + numb
+                            val finalresult = result.toString()
+                            myRef.child("score").setValue(finalresult)
+                        } catch (e: NumberFormatException) {
+                            Log.e("DetailsFragment", "Error parsing value: ${e.message}")
+                        }
+                    } else {
+                        Log.e("DetailsFragment", "Value string is empty or null")
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -518,9 +535,13 @@ class MainActivity : AppCompatActivity() {
             builder.setPositiveButton("OK") { _, _ ->
                 val mText = input.text.toString()
                 myRef.child("name").setValue(mText)
+                myRef.child("score").setValue("0")
+                myRef.child("times").setValue("0")
             }
             builder.setNegativeButton("Cancel") { dialog, _ ->
                 myRef.child("name").setValue("guest")
+                myRef.child("score").setValue("0")
+                myRef.child("times").setValue("0")
                 dialog.cancel()
             }
             builder.show()
