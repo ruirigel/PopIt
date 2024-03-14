@@ -37,6 +37,10 @@ import java.time.LocalDateTime
 class MainActivity : AppCompatActivity() {
 
     private var timer: CountDownTimer? = null
+    private val songList = listOf(R.raw.stranger0)
+    private lateinit var player: MediaPlayer
+    private var playermp = true
+    private var playermppaused = false
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,141 +62,133 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "No internet connection?", Toast.LENGTH_SHORT).show()
         }
 
-        val mp = MediaPlayer.create(this, R.raw.popitreset)
+        var mps = true
+        var mpb = MediaPlayer.create(this, R.raw.popit)
+        var mp = MediaPlayer.create(this, R.raw.popitreset)
         mp.start()
+        playSong(songList, 0)
+
         generate()
 
         val btnClick20 = findViewById<Button>(R.id.button20)
-        val mp20 = MediaPlayer.create(this, R.raw.popit)
         btnClick20.setOnClickListener {
-            mp20.start()
+            mpb.start()
             vibratePhone()
             btnClick20.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
+        btnClick20.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                player.stop()
+            }
+        }
 
         val btnClick21 = findViewById<Button>(R.id.button21)
-        val mp21 = MediaPlayer.create(this, R.raw.popit)
         btnClick21.setOnClickListener {
-            mp21.start()
+            mpb.start()
             vibratePhone()
             btnClick21.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick22 = findViewById<Button>(R.id.button22)
-        val mp22 = MediaPlayer.create(this, R.raw.popit)
         btnClick22.setOnClickListener {
-            mp22.start()
+            mpb.start()
             vibratePhone()
             btnClick22.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
         val btnClick23 = findViewById<Button>(R.id.button23)
-        val mp23 = MediaPlayer.create(this, R.raw.popit)
         btnClick23.setOnClickListener {
-            mp23.start()
+            mpb.start()
             vibratePhone()
             btnClick23.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick24 = findViewById<Button>(R.id.button24)
-        val mp24 = MediaPlayer.create(this, R.raw.popit)
         btnClick24.setOnClickListener {
-            mp24.start()
+            mpb.start()
             vibratePhone()
             btnClick24.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick25 = findViewById<Button>(R.id.button25)
-        val mp25 = MediaPlayer.create(this, R.raw.popit)
         btnClick25.setOnClickListener {
-            mp25.start()
+            mpb.start()
             vibratePhone()
             btnClick25.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick26 = findViewById<Button>(R.id.button26)
-        val mp26 = MediaPlayer.create(this, R.raw.popit)
         btnClick26.setOnClickListener {
-            mp26.start()
+            mpb.start()
             vibratePhone()
             btnClick26.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick27 = findViewById<Button>(R.id.button27)
-        val mp27 = MediaPlayer.create(this, R.raw.popit)
         btnClick27.setOnClickListener {
-            mp27.start()
+            mpb.start()
             vibratePhone()
             btnClick27.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick28 = findViewById<Button>(R.id.button28)
-        val mp28 = MediaPlayer.create(this, R.raw.popit)
         btnClick28.setOnClickListener {
-            mp28.start()
+            mpb.start()
             vibratePhone()
             btnClick28.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick29 = findViewById<Button>(R.id.button29)
-        val mp29 = MediaPlayer.create(this, R.raw.popit)
         btnClick29.setOnClickListener {
-            mp29.start()
+            mpb.start()
             vibratePhone()
             btnClick29.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick30 = findViewById<Button>(R.id.button30)
-        val mp30 = MediaPlayer.create(this, R.raw.popit)
         btnClick30.setOnClickListener {
-            mp30.start()
+            mpb.start()
             vibratePhone()
             btnClick30.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick31 = findViewById<Button>(R.id.button31)
-        val mp31 = MediaPlayer.create(this, R.raw.popit)
         btnClick31.setOnClickListener {
-            mp31.start()
+            mpb.start()
             vibratePhone()
             btnClick31.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick32 = findViewById<Button>(R.id.button32)
-        val mp32 = MediaPlayer.create(this, R.raw.popit)
         btnClick32.setOnClickListener {
-            mp32.start()
+            mpb.start()
             vibratePhone()
             btnClick32.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick33 = findViewById<Button>(R.id.button33)
-        val mp33 = MediaPlayer.create(this, R.raw.popit)
         btnClick33.setOnClickListener {
-            mp33.start()
+            mpb.start()
             vibratePhone()
             btnClick33.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick34 = findViewById<Button>(R.id.button34)
-        val mp34 = MediaPlayer.create(this, R.raw.popit)
         btnClick34.setOnClickListener {
-            mp34.start()
+            mpb.start()
             vibratePhone()
             btnClick34.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick35 = findViewById<Button>(R.id.button35)
-        val mp35 = MediaPlayer.create(this, R.raw.popit)
         btnClick35.setOnClickListener {
-            mp35.start()
+            mpb.start()
             vibratePhone()
             btnClick35.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
 
         val btnClick36 = findViewById<Button>(R.id.button36)
-        val mp36 = MediaPlayer.create(this, R.raw.popit)
         btnClick36.setOnClickListener {
-            mp36.start()
+            mpb.start()
             vibratePhone()
             btnClick36.setBackgroundColor(Color.parseColor("#3F51B4"))
         }
@@ -206,9 +202,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         val btnClick38 = findViewById<Button>(R.id.button38)
-        val mp38 = MediaPlayer.create(this, R.raw.popitreset)
         btnClick38.setOnClickListener {
-            mp38.start()
+            mp.start()
             vibratePhone()
             generate()
             btnClick38.setBackgroundColor(Color.parseColor("#3F51B4"))
@@ -218,14 +213,52 @@ class MainActivity : AppCompatActivity() {
         }
 
         val btnClick39 = findViewById<Button>(R.id.button39)
-        val mp39 = MediaPlayer.create(this, R.raw.popit)
         btnClick39.setOnClickListener {
-            mp39.start()
+            mpb.start()
             vibratePhone()
             showscore()
             btnClick39.setBackgroundColor(Color.parseColor("#5587ED"))
 
         }
+
+        val btnClick40 = findViewById<Button>(R.id.button40)
+        btnClick40.setOnClickListener {
+            mpb.start()
+            vibratePhone()
+            if (player.isPlaying) {
+                btnClick40.setBackgroundColor(Color.parseColor("#3F51B4"))
+                player.pause()
+                playermp = false
+                playermppaused = true
+            } else {
+                btnClick40.setBackgroundColor(Color.parseColor("#009688"))
+                player.start()
+                playermp = true
+                playermppaused = false
+            }
+
+        }
+
+        val btnClick41 = findViewById<Button>(R.id.button41)
+        btnClick41.setOnClickListener {
+            mpb.start()
+            vibratePhone()
+            Thread.sleep(200)
+            if (mps) {
+                btnClick41.setBackgroundColor(Color.parseColor("#3F51B4"))
+                mp.stop()
+                mpb.stop()
+                mps = false
+            } else {
+                btnClick41.setBackgroundColor(Color.parseColor("#4CAF50"))
+                mpb = MediaPlayer.create(this, R.raw.popit)
+                mpb.start()
+                mp = MediaPlayer.create(this, R.raw.popitreset)
+                mps = true
+
+            }
+        }
+
     }
 
     private fun generate() {
@@ -248,7 +281,6 @@ class MainActivity : AppCompatActivity() {
             R.id.button35,
             R.id.button36,
             R.id.button37,
-            R.id.button39
         )
         for (i in 0..17) {
             val buttons = findViewById<Button>(buttonIds[i])
@@ -300,7 +332,6 @@ class MainActivity : AppCompatActivity() {
                     val buttons = findViewById<Button>(buttonIds[i])
                     buttons.isEnabled = false
                     buttons.isClickable = false
-                    //btnClick38.text = ""
                 }
             }
         }.start()
@@ -348,7 +379,12 @@ class MainActivity : AppCompatActivity() {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
             val myRef = database.getReference("/data/$id")
-            myRef.child("country").setValue(arg1)
+            if (arg1.isNotEmpty()) {
+                myRef.child("country").setValue(arg1)
+            } else {
+                myRef.child("country").setValue("n/a")
+
+            }
         }
     }
 
@@ -388,25 +424,22 @@ class MainActivity : AppCompatActivity() {
             val usersRef = rootRef.child("data")
 
             val builder = AlertDialog.Builder(this)
-            builder.setTitle("Global Score Board")
+            builder.setTitle("Top 10 of Global Score")
 
             usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     var names = arrayOf<String>()
                     val namesList = names.toMutableList()
                     var c = 1
-                    var nameb: String
-                    var countryb: String
-                    var scoreb: String
                     for (userSnapshot in snapshot.children) {
                         val name = userSnapshot.child("name").getValue(String::class.java)
                         val country = userSnapshot.child("country").getValue(String::class.java)
                         val score = userSnapshot.child("score").getValue(String::class.java)
                         if (name != null && country != null && score != null) {
-                            nameb = name.toString().padStart(0, ' ')
-                            countryb = country.toString().padStart(0, ' ')
-                            scoreb = score.toString().padStart(35, ' ')
-                            namesList.add("$countryb - $nameb, $scoreb pts")
+                            //val scorecount = 40 - (name.length + country.length + score.length)
+                            //val scoreb = score.toString().padStart(scorecount, ' ')
+                            namesList.add("★ $name   $score pts")
+
                             c++
                         }
                     }
@@ -521,7 +554,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun askforusername() {
+    private fun askforusername() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
@@ -564,4 +597,39 @@ class MainActivity : AppCompatActivity() {
         }
         return false
     }
+
+    private fun playSong(songList: List<Int>, flag: Int) {
+        player = MediaPlayer.create(this, songList[flag])
+        val maxVolume = 100.0f
+        val currVolume = 5.0f
+        player.setVolume(currVolume / maxVolume, currVolume / maxVolume)
+        if (player.isPlaying) {
+            player.stop()
+            player.reset()
+            player.release();
+            player.start()
+        } else {
+            player.start()
+        }
+        player.setOnCompletionListener {
+            val nextFlag = if (flag == songList.lastIndex) 0 else flag + 1
+            playSong(songList, nextFlag)
+        }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (!hasFocus) {
+            if (playermp) {
+                player.pause()
+                playermp = false
+            }
+        } else {
+            if (!playermp && !playermppaused) {
+                player.start()
+                playermp = true
+            }
+        }
+    }
 }
+
