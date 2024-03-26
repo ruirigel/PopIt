@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.media.MediaPlayer
@@ -18,7 +19,6 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.database.DataSnapshot
@@ -34,6 +34,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDateTime
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     private var timer: CountDownTimer? = null
@@ -50,7 +51,6 @@ class MainActivity : AppCompatActivity() {
     private var numbero = 0
     private var numberg = 0
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -64,11 +64,15 @@ class MainActivity : AppCompatActivity() {
             savedatetime(ldt)
             getpublicipaddress()
             devicename()
-            savetimes()
             firsttime()
+            savetimes()
             plays()
         } else {
-            Toast.makeText(this, "No internet connection?", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "No internet connection. Not having an internet connection does not invalidate playing on the app, it will just stop adding up the score.",
+                Toast.LENGTH_LONG
+            ).show()
         }
 
         var mpb = MediaPlayer.create(this, R.raw.popit)
@@ -334,6 +338,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    @SuppressLint("SetTextI18n")
     private fun generate() {
         if (numberofplays == 30) {
             numberofplays = 1
@@ -454,6 +459,7 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
+    @SuppressLint("HardwareIds")
     private fun savetimes() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
@@ -462,7 +468,7 @@ class MainActivity : AppCompatActivity() {
             myRef.child("times").addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val timesvalue = snapshot.value.toString()
-                    if (timesvalue.isNullOrEmpty()) {
+                    if (timesvalue.isNotEmpty()) {
                         try {
                             val num: Int = timesvalue.toInt()
                             val result = num + 1
@@ -482,6 +488,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("HardwareIds")
     private fun savedatetime(arg1: String) {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
@@ -491,6 +498,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("HardwareIds")
     private fun savecountrycode(arg1: String) {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
@@ -505,6 +513,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("HardwareIds")
     private fun savescore(arg1: String) {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
@@ -549,9 +558,11 @@ class MainActivity : AppCompatActivity() {
                     val namesList = namesArray.toMutableList()
 
                     for (userSnapshot in snapshot.children) {
-                        val name = userSnapshot.child("name").getValue(String::class.java)
-                        val score = userSnapshot.child("score").getValue(String::class.java)
-                        namesList.add("$name $score")
+                        if (userSnapshot.child("name").exists() && userSnapshot.child("score").exists()) {
+                            val name = userSnapshot.child("name").getValue(String::class.java)
+                            val score = userSnapshot.child("score").getValue(String::class.java)
+                            namesList.add("$name $score")
+                        }
                     }
 
                     val nameAndScoreList: MutableList<Pair<String, Int>> =
@@ -612,9 +623,16 @@ class MainActivity : AppCompatActivity() {
                     println("Error reading data: ${error.message}")
                 }
             })
+        } else {
+            Toast.makeText(
+                this,
+                "No internet connection. To see the score table you need an internet connection.",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
+    @SuppressLint("HardwareIds")
     private fun getpublicipaddress() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
@@ -638,6 +656,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     @Suppress("DEPRECATION")
     private fun vibratePhone() {
         val v = getSystemService(VIBRATOR_SERVICE) as Vibrator
@@ -648,6 +667,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("HardwareIds")
     private fun devicename() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
@@ -658,6 +678,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("HardwareIds")
     private fun firsttime() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
@@ -677,30 +698,39 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("HardwareIds")
     private fun askforusername() {
         if (isonline(this)) {
             val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             val database = Firebase.database
             val myRef = database.getReference("/data/$id")
             val builder = AlertDialog.Builder(this)
+            builder.setCancelable(false)
             builder.setTitle("First time")
-            builder.setMessage(" Do you want join in Top 10 of global Score?\n Please write a username below.")
+            builder.setMessage("Do you want join in Top 10 of global Score?\nPlease write a username below.")
             val input = EditText(this)
             val maxLength = 15
+            input.setHint("Username")
+            val currentTimeMillis = System.currentTimeMillis()
             input.filters = arrayOf(InputFilter.LengthFilter(maxLength))
             input.inputType = InputType.TYPE_CLASS_TEXT
             builder.setView(input)
             builder.setPositiveButton("OK") { _, _ ->
                 val removespace = input.text.filter { !it.isWhitespace() }
                 val mText = removespace.toString()
-                myRef.child("name").setValue(mText)
+                if (mText.isEmpty()) {
+                    myRef.child("name").setValue("guest$currentTimeMillis")
+                } else {
+                    myRef.child("name").setValue(mText)
+                }
                 myRef.child("score").setValue("0")
-                myRef.child("times").setValue("0")
+                myRef.child("times").setValue("1")
             }
             builder.setNegativeButton("Cancel") { dialog, _ ->
-                myRef.child("name").setValue("guest")
+                myRef.child("name").setValue("guest$currentTimeMillis")
                 myRef.child("score").setValue("0")
-                myRef.child("times").setValue("0")
+                myRef.child("times").setValue("1")
+
                 dialog.cancel()
             }
             builder.show()
@@ -760,14 +790,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkButtonColor(arg1: CharSequence) {
-        if (arg1 == "+1") {
-            savescore("1")
-        } else if (arg1 == "+10") {
-            savescore("10")
-        } else if (arg1 == "+15") {
-            savescore("15")
-        } else if (arg1 == "+30") {
-            savescore("30")
+        when (arg1) {
+            "+1" -> {
+                savescore("1")
+            }
+
+            "+10" -> {
+                savescore("10")
+            }
+
+            "+15" -> {
+                savescore("15")
+            }
+
+            "+30" -> {
+                savescore("30")
+            }
         }
     }
 
