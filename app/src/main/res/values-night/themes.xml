@@ -4,5 +4,6 @@
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
         <item name="android:windowBackground">@color/splash_color</item>
+        <item name="android:navigationBarColor">@color/navigationBar_color</item>
     </style>
 </resources>

@@ -10,10 +10,10 @@ android {
 
     defaultConfig {
         applicationId = "com.example.myapplication"
-        minSdk = 31
+        minSdk = 26
         targetSdk = 34
-        versionCode = 240320241
-        versionName = "v24032024-1"
+        versionCode = 31032024
+        versionName = "v31032024"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -42,6 +42,7 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.google.firebase:firebase-database-ktx:20.3.1")
+    implementation("com.google.firebase:firebase-auth-ktx")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

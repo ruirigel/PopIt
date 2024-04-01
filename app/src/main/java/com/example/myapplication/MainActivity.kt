@@ -16,11 +16,15 @@ import android.telephony.TelephonyManager
 import android.text.InputFilter
 import android.text.InputType
 import android.util.Log
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -33,6 +37,7 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDateTime
+
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
@@ -50,23 +55,26 @@ class MainActivity : AppCompatActivity() {
     private var numberr = 0
     private var numbero = 0
     private var numberg = 0
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         window.statusBarColor = resources.getColor(R.color.statusBarColor)
 
+        auth = Firebase.auth
+
         if (isonline(this)) {
             val tm = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
             val countryCodeValue = tm.networkCountryIso
             savecountrycode(countryCodeValue)
             val ldt = LocalDateTime.now().toString()
+            signInAnonymously()
             savedatetime(ldt)
             getpublicipaddress()
             devicename()
             firsttime()
             savetimes()
-            plays()
         } else {
             Toast.makeText(
                 this,
@@ -77,6 +85,7 @@ class MainActivity : AppCompatActivity() {
 
         var mpb = MediaPlayer.create(this, R.raw.popit)
         playSong(songList, 0)
+        plays()
         generate()
 
         val btnClick20 = findViewById<Button>(R.id.button20)
@@ -295,7 +304,6 @@ class MainActivity : AppCompatActivity() {
             vibratePhone()
             showscore()
             btnClick39.setBackgroundColor(Color.parseColor("#5587ED"))
-
         }
 
         val btnClick40 = findViewById<Button>(R.id.button40)
@@ -391,6 +399,7 @@ class MainActivity : AppCompatActivity() {
             buttonsr.text = "+30"
             buttonsr.textSize = 24f
             buttonsr.setTextColor(Color.parseColor("#2B2D30"))
+            buttonsr.startAnimation(AnimationUtils.loadAnimation(this, R.anim.shake))
             mpbs.start()
         }
         if (numberofplays == orangerandomofplays) {
@@ -402,6 +411,7 @@ class MainActivity : AppCompatActivity() {
             buttonso.text = "+15"
             buttonso.textSize = 24f
             buttonso.setTextColor(Color.parseColor("#2B2D30"))
+            buttonso.startAnimation(AnimationUtils.loadAnimation(this, R.anim.shake))
             mpbs.start()
         }
         if (numberofplays == grayrandomofplays) {
@@ -413,6 +423,7 @@ class MainActivity : AppCompatActivity() {
             buttonsg.text = "+10"
             buttonsg.textSize = 24f
             buttonsg.setTextColor(Color.parseColor("#2B2D30"))
+            buttonsg.startAnimation(AnimationUtils.loadAnimation(this, R.anim.shake))
             mpbs.start()
         }
 
@@ -462,53 +473,63 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("HardwareIds")
     private fun savetimes() {
         if (isonline(this)) {
-            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-            val database = Firebase.database
-            val myRef = database.getReference("/data/$id")
-            myRef.child("times").addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val timesvalue = snapshot.value.toString()
-                    if (timesvalue.isNotEmpty()) {
-                        try {
+            try {
+                val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                val database = Firebase.database
+                val myRef = database.getReference("/data/$id")
+                myRef.child("times").addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val timesvalue = snapshot.value.toString()
+                        if (timesvalue.isNotEmpty()) {
+
                             val num: Int = timesvalue.toInt()
                             val result = num + 1
                             myRef.child("times").setValue(result)
-                        } catch (e: NumberFormatException) {
-                            Log.e("DetailsFragment", "Error parsing value: ${e.message}")
-                        }
-                    } else {
-                        Log.e("DetailsFragment", "Value string is empty or null")
-                    }
-                }
 
-                override fun onCancelled(error: DatabaseError) {
-                    // Handle any errors or cancellation
-                }
-            })
+                        } else {
+                            Log.e("DetailsFragment", "Value string is empty or null")
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        // Handle any errors or cancellation
+                    }
+                })
+            } catch (e: Exception) {
+                Log.e("saveTimes", "Error: ${e.message}")
+            }
         }
     }
 
     @SuppressLint("HardwareIds")
     private fun savedatetime(arg1: String) {
         if (isonline(this)) {
-            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-            val database = Firebase.database
-            val myRef = database.getReference("/data/$id")
-            myRef.child("date").setValue(arg1)
+            try {
+                val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                val database = Firebase.database
+                val myRef = database.getReference("/data/$id")
+                myRef.child("date").setValue(arg1)
+            } catch (e: Exception) {
+                Log.e("saveDateTime", "Error: ${e.message}")
+            }
         }
     }
 
     @SuppressLint("HardwareIds")
     private fun savecountrycode(arg1: String) {
         if (isonline(this)) {
-            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-            val database = Firebase.database
-            val myRef = database.getReference("/data/$id")
-            if (arg1.isNotEmpty()) {
-                myRef.child("country").setValue(arg1)
-            } else {
-                myRef.child("country").setValue("n/a")
+            try {
+                val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                val database = Firebase.database
+                val myRef = database.getReference("/data/$id")
+                if (arg1.isNotEmpty()) {
+                    myRef.child("country").setValue(arg1)
+                } else {
+                    myRef.child("country").setValue("n/a")
 
+                }
+            } catch (e: Exception) {
+                Log.e("saveCountryCode", "Error: ${e.message}")
             }
         }
     }
@@ -516,113 +537,119 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("HardwareIds")
     private fun savescore(arg1: String) {
         if (isonline(this)) {
-            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-            val database = Firebase.database
-            val myRef = database.getReference("/data/$id")
-            myRef.child("score").addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val scorevalue = snapshot.value.toString()
-                    if (scorevalue.isNotEmpty()) {
-                        try {
+            try {
+                val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                val database = Firebase.database
+                val myRef = database.getReference("/data/$id")
+                myRef.child("score").addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val scorevalue = snapshot.value.toString()
+                        if (scorevalue.isNotEmpty()) {
                             val numa: Int = scorevalue.toInt()
                             val numb: Int = arg1.toInt()
                             val result = numa + numb
                             val finalresult = result.toString()
                             myRef.child("score").setValue(finalresult)
-                        } catch (e: NumberFormatException) {
-                            Log.e("DetailsFragment", "Error parsing value: ${e.message}")
+                        } else {
+                            Log.e("saveScore", "Value string is empty or null")
                         }
-                    } else {
-                        Log.e("DetailsFragment", "Value string is empty or null")
                     }
-                }
 
-                override fun onCancelled(error: DatabaseError) {
-                    // Handle any errors or cancellation
-                }
-            })
+                    override fun onCancelled(error: DatabaseError) {
+                        // Handle any errors or cancellation
+                    }
+                })
+            } catch (e: Exception) {
+                Log.e("saveScore", "Error: ${e.message}")
+            }
         }
     }
 
     private fun showscore() {
         if (isonline(this)) {
-            val rootRef = FirebaseDatabase.getInstance().reference
-            val usersRef = rootRef.child("data")
-            val builder = AlertDialog.Builder(this)
-            builder.setTitle("Top 10 of Global Score")
+            try {
+                val rootRef = FirebaseDatabase.getInstance().reference
+                val usersRef = rootRef.child("data")
+                val builder = AlertDialog.Builder(this)
+                builder.setTitle("Top 10 of Global Score")
 
-            usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
+                usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val namesArray = arrayOf<String>()
+                        val namesList = namesArray.toMutableList()
 
-                    val namesArray = arrayOf<String>()
-                    val namesList = namesArray.toMutableList()
-
-                    for (userSnapshot in snapshot.children) {
-                        if (userSnapshot.child("name").exists() && userSnapshot.child("score").exists()) {
-                            val name = userSnapshot.child("name").getValue(String::class.java)
-                            val score = userSnapshot.child("score").getValue(String::class.java)
-                            namesList.add("$name $score")
-                        }
-                    }
-
-                    val nameAndScoreList: MutableList<Pair<String, Int>> =
-                        namesList.map { element ->
-                            val (name, score) = element.split(" ")
-                            Pair(name, score.toInt())
-                        }.toMutableList()
-                    val sortedList = nameAndScoreList.sortedByDescending { it.second }
-
-                    sortedList.forEachIndexed { index, (name, score) ->
-                        val adjustedIndex = index + 1
-                        namesList[index] = "$adjustedIndex - $name $score"
-                    }
-
-                    val sortedResult = namesList.toTypedArray()
-                    builder.setItems(sortedResult) { _, which ->
-                        when (which) {
-                            0 -> {
-                            }
-
-                            1 -> {
-                            }
-
-                            2 -> {
-                            }
-
-                            3 -> {
-                            }
-
-                            4 -> {
-                            }
-
-                            5 -> {
-                            }
-
-                            6 -> {
-                            }
-
-                            7 -> {
-                            }
-
-                            8 -> {
-                            }
-
-                            9 -> {
+                        for (userSnapshot in snapshot.children) {
+                            if (userSnapshot.child("name").exists() && userSnapshot.child("score")
+                                    .exists()
+                            ) {
+                                val name = userSnapshot.child("name").getValue(String::class.java)
+                                val score = userSnapshot.child("score").getValue(String::class.java)
+                                namesList.add("$name $score")
                             }
                         }
-                    }
-                    builder.setNegativeButton("") { dialog, _ ->
-                        dialog.cancel()
-                    }
-                    val dialog = builder.create()
-                    dialog.show()
-                }
 
-                override fun onCancelled(error: DatabaseError) {
-                    // Handle database read error
-                    println("Error reading data: ${error.message}")
-                }
-            })
+                        val nameAndScoreList: MutableList<Pair<String, Int>> =
+                            namesList.map { element ->
+                                val (name, score) = element.split(" ")
+                                Pair(name, score.toInt())
+                            }.toMutableList()
+                        val sortedList = nameAndScoreList.sortedByDescending { it.second }
+
+                        sortedList.forEachIndexed { index, (name, score) ->
+                            val adjustedIndex = index + 1
+                            namesList[index] = "$adjustedIndex - $name $score"
+                        }
+
+                        val sortedResult = namesList.toTypedArray()
+                        builder.setItems(sortedResult) { _, which ->
+                            when (which) {
+                                0 -> {
+                                }
+
+                                1 -> {
+                                }
+
+                                2 -> {
+                                }
+
+                                3 -> {
+                                }
+
+                                4 -> {
+                                }
+
+                                5 -> {
+                                }
+
+                                6 -> {
+                                }
+
+                                7 -> {
+                                }
+
+                                8 -> {
+                                }
+
+                                9 -> {
+                                }
+                            }
+                        }
+                        builder.setNegativeButton("") { dialog, _ ->
+                            dialog.cancel()
+                        }
+                        val dialog = builder.create()
+                        dialog.show()
+
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        // Handle database read error
+                        println("Error reading data: ${error.message}")
+                    }
+                })
+            } catch (e: Exception) {
+                Log.e("showScore", "Error: ${e.message}")
+            }
         } else {
             Toast.makeText(
                 this,
@@ -681,59 +708,67 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("HardwareIds")
     private fun firsttime() {
         if (isonline(this)) {
-            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-            val database = Firebase.database
-            val myRef = database.getReference("/data/$id")
-            myRef.child("name").addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (!snapshot.exists()) {
-                        askforusername()
+            try {
+                val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                val database = Firebase.database
+                val myRef = database.getReference("/data/$id")
+                myRef.child("name").addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (!snapshot.exists()) {
+                            askforusername()
+                        }
                     }
-                }
 
-                override fun onCancelled(error: DatabaseError) {
-                    // Handle any errors or cancellation
-                }
-            })
+                    override fun onCancelled(error: DatabaseError) {
+                        // Handle any errors or cancellation
+                    }
+                })
+            } catch (e: Exception) {
+                Log.e("firstTime", "Error: ${e.message}")
+            }
         }
     }
 
     @SuppressLint("HardwareIds")
     private fun askforusername() {
         if (isonline(this)) {
-            val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-            val database = Firebase.database
-            val myRef = database.getReference("/data/$id")
-            val builder = AlertDialog.Builder(this)
-            builder.setCancelable(false)
-            builder.setTitle("First time")
-            builder.setMessage("Do you want join in Top 10 of global Score?\nPlease write a username below.")
-            val input = EditText(this)
-            val maxLength = 15
-            input.setHint("Username")
-            val currentTimeMillis = System.currentTimeMillis()
-            input.filters = arrayOf(InputFilter.LengthFilter(maxLength))
-            input.inputType = InputType.TYPE_CLASS_TEXT
-            builder.setView(input)
-            builder.setPositiveButton("OK") { _, _ ->
-                val removespace = input.text.filter { !it.isWhitespace() }
-                val mText = removespace.toString()
-                if (mText.isEmpty()) {
-                    myRef.child("name").setValue("guest$currentTimeMillis")
-                } else {
-                    myRef.child("name").setValue(mText)
+            try {
+                val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                val database = Firebase.database
+                val myRef = database.getReference("/data/$id")
+                val builder = AlertDialog.Builder(this)
+                builder.setCancelable(false)
+                builder.setTitle("First time")
+                builder.setMessage("Do you want join in Top 10 of global Score?\nPlease write a username below.")
+                val input = EditText(this)
+                val maxLength = 15
+                input.setHint("Username")
+                val currentTimeMillis = System.currentTimeMillis()
+                input.filters = arrayOf(InputFilter.LengthFilter(maxLength))
+                input.inputType = InputType.TYPE_CLASS_TEXT
+                builder.setView(input)
+                builder.setPositiveButton("OK") { _, _ ->
+                    val removespace = input.text.filter { !it.isWhitespace() }
+                    val mText = removespace.toString()
+                    if (mText.isEmpty()) {
+                        myRef.child("name").setValue("guest$currentTimeMillis")
+                    } else {
+                        myRef.child("name").setValue(mText)
+                    }
+                    myRef.child("score").setValue("0")
+                    myRef.child("times").setValue("1")
                 }
-                myRef.child("score").setValue("0")
-                myRef.child("times").setValue("1")
-            }
-            builder.setNegativeButton("Cancel") { dialog, _ ->
-                myRef.child("name").setValue("guest$currentTimeMillis")
-                myRef.child("score").setValue("0")
-                myRef.child("times").setValue("1")
+                builder.setNegativeButton("Cancel") { dialog, _ ->
+                    myRef.child("name").setValue("guest$currentTimeMillis")
+                    myRef.child("score").setValue("0")
+                    myRef.child("times").setValue("1")
 
-                dialog.cancel()
+                    dialog.cancel()
+                }
+                builder.show()
+            } catch (e: Exception) {
+                Log.e("askForUsername", "Error: ${e.message}")
             }
-            builder.show()
         }
     }
 
@@ -756,15 +791,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun plays() {
         val redminrandomofplays = 0
-        val redmaxrandomofplays = 30
+        val redmaxrandomofplays = 70
         redrandomofplays = (redminrandomofplays..redmaxrandomofplays).random()
 
         val orangeminrandomofplays = 0
-        val orangemaxrandomofplays = 15
+        val orangemaxrandomofplays = 50
         orangerandomofplays = (orangeminrandomofplays..orangemaxrandomofplays).random()
 
         val grayminrandomofplays = 0
-        val graymaxrandomofplays = 10
+        val graymaxrandomofplays = 30
         grayrandomofplays = (grayminrandomofplays..graymaxrandomofplays).random()
 
 
@@ -822,6 +857,38 @@ class MainActivity : AppCompatActivity() {
                 playermp = true
             }
         }
+    }
+
+    public override fun onStart() {
+        super.onStart()
+        val currentUser = auth.currentUser
+        updateUI(currentUser)
+    }
+
+    private fun signInAnonymously() {
+        auth.signInAnonymously()
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    Log.d(TAG, "signInAnonymously:success")
+                    val user = auth.currentUser
+                    updateUI(user)
+                } else {
+                    Log.w(TAG, "signInAnonymously:failure", task.exception)
+                    Toast.makeText(
+                        baseContext,
+                        "Authentication failed.",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                    updateUI(null)
+                }
+            }
+    }
+
+    private fun updateUI(user: FirebaseUser?) {
+    }
+
+    companion object {
+        private const val TAG = "AnonymousAuth"
     }
 
 }
