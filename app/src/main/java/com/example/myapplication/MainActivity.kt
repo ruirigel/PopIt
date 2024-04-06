@@ -43,7 +43,15 @@ import java.time.LocalDateTime
 class MainActivity : AppCompatActivity() {
 
     private var timer: CountDownTimer? = null
-    private val songList = listOf(R.raw.stranger0)
+    private var composer = "Track: Trell Daniels - "
+    private val songList = listOf(
+        R.raw.backsong1,
+        R.raw.backsong2,
+        R.raw.backsong3,
+        R.raw.backsong4,
+        R.raw.backsong5,
+        R.raw.backsong6
+    )
     private lateinit var player: MediaPlayer
     private var playermp = true
     private var playermppaused = false
@@ -86,7 +94,7 @@ class MainActivity : AppCompatActivity() {
         var mpb = MediaPlayer.create(this, R.raw.popit)
         playSong(songList, 0)
         plays()
-        generate()
+        //generate()
 
         val btnClick20 = findViewById<Button>(R.id.button20)
         btnClick20.setOnClickListener {
@@ -294,6 +302,7 @@ class MainActivity : AppCompatActivity() {
             vibratePhone()
             generate()
             btnClick38.setBackgroundColor(Color.parseColor("#3F51B4"))
+            btnClick38.startAnimation(AnimationUtils.loadAnimation(this, R.anim.shake))
         }
 
         val btnClick39 = findViewById<Button>(R.id.button39)
@@ -438,6 +447,12 @@ class MainActivity : AppCompatActivity() {
         timer = object : CountDownTimer(4000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 btnClick38.text = (millisUntilFinished / 1000).toString()
+                when (btnClick38.text) {
+                    0.toString() -> btnClick38.setBackgroundColor(Color.parseColor("#ff0000"))
+                    1.toString() -> btnClick38.setBackgroundColor(Color.parseColor("#ffa700"))
+                    2.toString() -> btnClick38.setBackgroundColor(Color.parseColor("#fff400"))
+                    3.toString() -> btnClick38.setBackgroundColor(Color.parseColor("#a3ff00"))
+                }
             }
 
             override fun onFinish() {
@@ -466,6 +481,7 @@ class MainActivity : AppCompatActivity() {
                     buttons.isEnabled = false
                     buttons.isClickable = false
                 }
+                btnClick38.setBackgroundColor(Color.parseColor("#3F51B4"))
             }
         }.start()
     }
@@ -791,11 +807,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun plays() {
         val redminrandomofplays = 0
-        val redmaxrandomofplays = 70
+        val redmaxrandomofplays = 90
         redrandomofplays = (redminrandomofplays..redmaxrandomofplays).random()
 
         val orangeminrandomofplays = 0
-        val orangemaxrandomofplays = 50
+        val orangemaxrandomofplays = 60
         orangerandomofplays = (orangeminrandomofplays..orangemaxrandomofplays).random()
 
         val grayminrandomofplays = 0
@@ -806,7 +822,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun playSong(songList: List<Int>, flag: Int) {
-        player = MediaPlayer.create(this, songList[flag])
+        val randomIndex = songList.indices.random()
+        player = MediaPlayer.create(this, songList[randomIndex])
         val maxVolume = 100.0f
         val currVolume = 5.0f
         player.setVolume(currVolume / maxVolume, currVolume / maxVolume)
@@ -815,8 +832,18 @@ class MainActivity : AppCompatActivity() {
             player.reset()
             player.release()
             player.start()
+            Toast.makeText(
+                baseContext,
+                composer + resources.getResourceEntryName(songList[randomIndex]),
+                Toast.LENGTH_LONG,
+            ).show()
         } else {
             player.start()
+            Toast.makeText(
+                baseContext,
+                composer + resources.getResourceEntryName(songList[randomIndex]),
+                Toast.LENGTH_LONG,
+            ).show()
         }
         player.setOnCompletionListener {
             val nextFlag = if (flag == songList.lastIndex) 0 else flag + 1
@@ -890,6 +917,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "AnonymousAuth"
     }
+
 
 }
 

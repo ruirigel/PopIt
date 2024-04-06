@@ -225,9 +225,15 @@
         android:layout_marginBottom="24dp"
         android:backgroundTint="#3F51B4"
         android:tag="38"
+        android:text="0"
         android:textAlignment="center"
         android:textColor="#2B2D30"
         android:textSize="34sp"
+        app:icon="@drawable/clock"
+        app:iconGravity="textEnd"
+        app:iconPadding="30dp"
+        app:iconSize="35dp"
+        app:iconTint="#2B2D30"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -242,6 +248,7 @@
         app:iconGravity="textEnd"
         app:iconPadding="0dp"
         app:iconSize="20dp"
+        app:iconTint="#2B2D30"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -257,6 +264,7 @@
         app:iconGravity="textEnd"
         app:iconPadding="0dp"
         app:iconSize="20dp"
+        app:iconTint="#2B2D30"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button39"
         app:layout_constraintHorizontal_bias="0.571"
@@ -275,6 +283,7 @@
         app:iconGravity="textEnd"
         app:iconPadding="0dp"
         app:iconSize="20dp"
+        app:iconTint="#2B2D30"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button39"
         app:layout_constraintHorizontal_bias="0.571"
