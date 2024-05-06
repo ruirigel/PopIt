@@ -2,6 +2,7 @@ package com.example.myapplication
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Color
 import android.media.MediaPlayer
 import android.net.ConnectivityManager
@@ -19,6 +20,8 @@ import android.util.Log
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -45,12 +48,11 @@ class MainActivity : AppCompatActivity() {
     private var timer: CountDownTimer? = null
     private var composer = "Track: Trell Daniels - "
     private val songList = listOf(
-        R.raw.backsong1,
-        R.raw.backsong2,
-        R.raw.backsong3,
-        R.raw.backsong4,
-        R.raw.backsong5,
-        R.raw.backsong6
+        R.raw.vanilla_sky,
+        R.raw.euphoria,
+        R.raw.interstate_5,
+        R.raw.sanya,
+        R.raw.dalia
     )
     private lateinit var player: MediaPlayer
     private var playermp = true
@@ -58,11 +60,13 @@ class MainActivity : AppCompatActivity() {
     private var redrandomofplays = 0
     private var grayrandomofplays = 0
     private var orangerandomofplays = 0
+    private var starrandomofplays = 0
     private var numberofplays = 0
     private var mps = true
     private var numberr = 0
     private var numbero = 0
     private var numberg = 0
+    private var numberstar = 0
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -436,6 +440,19 @@ class MainActivity : AppCompatActivity() {
             mpbs.start()
         }
 
+        if (numberofplays == starrandomofplays) {
+            val minStarBubble = 0
+            val maxStarBubble = 17
+            numberstar = (minStarBubble..maxStarBubble).random()
+            val buttonss = findViewById<Button>(buttonIds[numberstar])
+            buttonss.setBackgroundColor(Color.YELLOW)
+            buttonss.text = "★"
+            buttonss.textSize = 44f
+            buttonss.setTextColor(Color.parseColor("#2B2D30"))
+            buttonss.startAnimation(AnimationUtils.loadAnimation(this, R.anim.shake))
+            mpbs.start()
+        }
+
         numberofplays++
         timer?.cancel()
         timer = null
@@ -566,6 +583,15 @@ class MainActivity : AppCompatActivity() {
                             val result = numa + numb
                             val finalresult = result.toString()
                             myRef.child("score").setValue(finalresult)
+
+                            val textView1: TextView = findViewById(R.id.textView1)
+                            val scorevaluenow: String = textView1.text.toString()
+                            val numanow: Int = scorevaluenow.toInt()
+                            val numbnow: Int = arg1.toInt()
+                            val resultnow = numbnow + numanow
+                            val finalresultnow = resultnow.toString()
+                            textView1.text = finalresultnow
+
                         } else {
                             Log.e("saveScore", "Value string is empty or null")
                         }
@@ -581,6 +607,48 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("HardwareIds")
+    @Suppress("SameParameterValue")
+    private fun savestars(arg1: String) {
+        if (isonline(this)) {
+            try {
+                val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                val database = Firebase.database
+                val myRef = database.getReference("/data/$id")
+                myRef.child("stars").addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val scorestarsvalue = snapshot.value.toString()
+                        if (scorestarsvalue.isNotEmpty()) {
+                            val numstarsa: Int = scorestarsvalue.toInt()
+                            val numstarsb: Int = arg1.toInt()
+                            val resultstars = numstarsa + numstarsb
+                            val finalstarsresult = resultstars.toString()
+                            myRef.child("stars").setValue(finalstarsresult)
+
+                            val textView2: TextView = findViewById(R.id.textView2)
+                            val scorevaluestarsnow: String = textView2.text.toString()
+                            val numastarsnow: Int = scorevaluestarsnow.toInt()
+                            val numbstarsnow: Int = arg1.toInt()
+                            val resultstarsnow = numbstarsnow + numastarsnow
+                            val finalresultstarsnow = resultstarsnow.toString()
+                            textView2.text = finalresultstarsnow
+
+                        } else {
+                            Log.e("saveStars", "Value string is empty or null")
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        // Handle any errors or cancellation
+                    }
+                })
+            } catch (e: Exception) {
+                Log.e("saveStars", "Error: ${e.message}")
+            }
+        }
+    }
+
+
     private fun showscore() {
         if (isonline(this)) {
             try {
@@ -588,7 +656,6 @@ class MainActivity : AppCompatActivity() {
                 val usersRef = rootRef.child("data")
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle("Top 10 of Global Score")
-
                 usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val namesArray = arrayOf<String>()
@@ -654,6 +721,7 @@ class MainActivity : AppCompatActivity() {
                             dialog.cancel()
                         }
                         val dialog = builder.create()
+                        dialog.window?.decorView?.setBackgroundResource(R.drawable.dialog_background)
                         dialog.show()
 
                     }
@@ -755,15 +823,18 @@ class MainActivity : AppCompatActivity() {
                 val builder = AlertDialog.Builder(this)
                 builder.setCancelable(false)
                 builder.setTitle("First time")
-                builder.setMessage("Do you want join in Top 10 of global Score?\nPlease write a username below.")
+                builder.setMessage("Do you want join in Top 10 of Global Score?\n\nPlease write a username below.")
                 val input = EditText(this)
+                val inputlayout = FrameLayout(this)
+                inputlayout.setPaddingRelative(50, 15, 50, 0)
                 val maxLength = 15
                 input.setHint("Username")
                 val currentTimeMillis = System.currentTimeMillis()
                 input.filters = arrayOf(InputFilter.LengthFilter(maxLength))
                 input.inputType = InputType.TYPE_CLASS_TEXT
-                builder.setView(input)
-                builder.setPositiveButton("OK") { _, _ ->
+                inputlayout.addView(input)
+                builder.setView(inputlayout)
+                builder.setPositiveButton("Submit") { _, _ ->
                     val removespace = input.text.filter { !it.isWhitespace() }
                     val mText = removespace.toString()
                     if (mText.isEmpty()) {
@@ -773,15 +844,25 @@ class MainActivity : AppCompatActivity() {
                     }
                     myRef.child("score").setValue("0")
                     myRef.child("times").setValue("1")
+                    myRef.child("stars").setValue("0")
                 }
                 builder.setNegativeButton("Cancel") { dialog, _ ->
                     myRef.child("name").setValue("guest$currentTimeMillis")
                     myRef.child("score").setValue("0")
                     myRef.child("times").setValue("1")
+                    myRef.child("stars").setValue("0")
+
 
                     dialog.cancel()
                 }
-                builder.show()
+                val dialog = builder.create()
+                dialog.window?.decorView?.setBackgroundResource(R.drawable.dialog_background)
+                dialog.show()
+                dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+                    .setTextColor(getResources().getColor(R.color.white))
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                    .setTextColor(getResources().getColor(R.color.white))
+
             } catch (e: Exception) {
                 Log.e("askForUsername", "Error: ${e.message}")
             }
@@ -818,7 +899,9 @@ class MainActivity : AppCompatActivity() {
         val graymaxrandomofplays = 30
         grayrandomofplays = (grayminrandomofplays..graymaxrandomofplays).random()
 
-
+        val starminrandomofplays = 0
+        val starmaxrandomofplays = 50
+        starrandomofplays = (starminrandomofplays..starmaxrandomofplays).random()
     }
 
     private fun playSong(songList: List<Int>, flag: Int) {
@@ -868,6 +951,10 @@ class MainActivity : AppCompatActivity() {
             "+30" -> {
                 savescore("30")
             }
+
+            "★" -> {
+                savestars("1")
+            }
         }
     }
 
@@ -911,7 +998,7 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    private fun updateUI(user: FirebaseUser?) {
+    private fun updateUI(@Suppress("UNUSED_PARAMETER")user: FirebaseUser?) {
     }
 
     companion object {
