@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
@@ -34,6 +35,10 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -68,6 +73,7 @@ class MainActivity : AppCompatActivity() {
     private var numberg = 0
     private var numberstar = 0
     private lateinit var auth: FirebaseAuth
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,6 +115,7 @@ class MainActivity : AppCompatActivity() {
             btnClick20.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick20.text)
             btnClick20.text = null
+            dropButton(R.id.button20)
         }
 
         val btnClick21 = findViewById<Button>(R.id.button21)
@@ -120,6 +127,7 @@ class MainActivity : AppCompatActivity() {
             btnClick21.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick21.text)
             btnClick21.text = null
+            dropButton(R.id.button21)
         }
 
         val btnClick22 = findViewById<Button>(R.id.button22)
@@ -131,6 +139,7 @@ class MainActivity : AppCompatActivity() {
             btnClick22.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick22.text)
             btnClick22.text = null
+            dropButton(R.id.button22)
         }
 
         val btnClick23 = findViewById<Button>(R.id.button23)
@@ -142,6 +151,7 @@ class MainActivity : AppCompatActivity() {
             btnClick23.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick23.text)
             btnClick23.text = null
+            dropButton(R.id.button23)
         }
 
         val btnClick24 = findViewById<Button>(R.id.button24)
@@ -153,6 +163,7 @@ class MainActivity : AppCompatActivity() {
             btnClick24.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick24.text)
             btnClick24.text = null
+            dropButton(R.id.button24)
         }
 
         val btnClick25 = findViewById<Button>(R.id.button25)
@@ -164,6 +175,7 @@ class MainActivity : AppCompatActivity() {
             btnClick25.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick25.text)
             btnClick25.text = null
+            dropButton(R.id.button25)
         }
 
         val btnClick26 = findViewById<Button>(R.id.button26)
@@ -175,6 +187,7 @@ class MainActivity : AppCompatActivity() {
             btnClick26.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick26.text)
             btnClick26.text = null
+            dropButton(R.id.button26)
         }
 
         val btnClick27 = findViewById<Button>(R.id.button27)
@@ -186,6 +199,7 @@ class MainActivity : AppCompatActivity() {
             btnClick27.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick27.text)
             btnClick27.text = null
+            dropButton(R.id.button27)
         }
 
         val btnClick28 = findViewById<Button>(R.id.button28)
@@ -197,6 +211,7 @@ class MainActivity : AppCompatActivity() {
             btnClick28.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick28.text)
             btnClick28.text = null
+            dropButton(R.id.button28)
         }
 
         val btnClick29 = findViewById<Button>(R.id.button29)
@@ -208,6 +223,7 @@ class MainActivity : AppCompatActivity() {
             btnClick29.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick29.text)
             btnClick29.text = null
+            dropButton(R.id.button29)
         }
 
         val btnClick30 = findViewById<Button>(R.id.button30)
@@ -219,6 +235,7 @@ class MainActivity : AppCompatActivity() {
             btnClick30.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick30.text)
             btnClick30.text = null
+            dropButton(R.id.button30)
         }
 
         val btnClick31 = findViewById<Button>(R.id.button31)
@@ -230,6 +247,7 @@ class MainActivity : AppCompatActivity() {
             btnClick31.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick31.text)
             btnClick31.text = null
+            dropButton(R.id.button31)
         }
 
         val btnClick32 = findViewById<Button>(R.id.button32)
@@ -241,6 +259,7 @@ class MainActivity : AppCompatActivity() {
             btnClick32.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick32.text)
             btnClick32.text = null
+            dropButton(R.id.button32)
         }
 
         val btnClick33 = findViewById<Button>(R.id.button33)
@@ -252,6 +271,7 @@ class MainActivity : AppCompatActivity() {
             btnClick33.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick33.text)
             btnClick33.text = null
+            dropButton(R.id.button33)
         }
 
         val btnClick34 = findViewById<Button>(R.id.button34)
@@ -263,6 +283,7 @@ class MainActivity : AppCompatActivity() {
             btnClick34.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick34.text)
             btnClick34.text = null
+            dropButton(R.id.button34)
         }
 
         val btnClick35 = findViewById<Button>(R.id.button35)
@@ -274,6 +295,7 @@ class MainActivity : AppCompatActivity() {
             btnClick35.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick35.text)
             btnClick35.text = null
+            dropButton(R.id.button35)
         }
 
         val btnClick36 = findViewById<Button>(R.id.button36)
@@ -285,6 +307,7 @@ class MainActivity : AppCompatActivity() {
             btnClick36.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick36.text)
             btnClick36.text = null
+            dropButton(R.id.button36)
         }
 
         val btnClick37 = findViewById<Button>(R.id.button37)
@@ -296,6 +319,7 @@ class MainActivity : AppCompatActivity() {
             btnClick37.setBackgroundColor(Color.parseColor("#3F51B4"))
             checkButtonColor(btnClick37.text)
             btnClick37.text = null
+            dropButton(R.id.button37)
         }
 
         val btnClick38 = findViewById<Button>(R.id.button38)
@@ -392,7 +416,13 @@ class MainActivity : AppCompatActivity() {
             buttons.isEnabled = true
             buttons.isClickable = true
             buttons.text = null
+
+            buttons.animate()
+                .translationY(0f)
+                .setDuration(0)
+                .start()
         }
+
         val min = 0
         val max = 17
         for (i in 0..7) {
@@ -503,6 +533,14 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
+    private fun dropButton(arg1: Int) {
+        val buttons = findViewById<Button>(arg1)
+        val animator = ObjectAnimator.ofFloat(buttons, "translationY", 0f, 3500f)
+        animator.duration = 500
+        animator.start()
+
+    }
+
     @SuppressLint("HardwareIds")
     private fun savetimes() {
         if (isonline(this)) {
@@ -584,16 +622,19 @@ class MainActivity : AppCompatActivity() {
                             val finalresult = result.toString()
                             myRef.child("score").setValue(finalresult)
 
+
                             val textView1: TextView = findViewById(R.id.textView1)
                             val scorevaluenow: String = textView1.text.toString()
                             val numanow: Int = scorevaluenow.toInt()
                             val numbnow: Int = arg1.toInt()
                             val resultnow = numbnow + numanow
-                            val finalresultnow = resultnow.toString()
-                            textView1.text = finalresultnow
+                            textView1.text = resultnow.toString()
+
+                            //delayscore(numanow, resultnow)
 
                         } else {
                             Log.e("saveScore", "Value string is empty or null")
+
                         }
                     }
 
@@ -606,6 +647,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+
+    private fun delayscore(arg1: Int, arg2: Int) {
+        val textView1: TextView = findViewById(R.id.textView1)
+        CoroutineScope(Dispatchers.Main).launch {
+            for (i in arg1..arg2) {
+                delay(100)
+                textView1.text = "$i"
+            }
+        }
+    }
+
 
     @SuppressLint("HardwareIds")
     @Suppress("SameParameterValue")
@@ -998,7 +1051,7 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    private fun updateUI(@Suppress("UNUSED_PARAMETER")user: FirebaseUser?) {
+    private fun updateUI(@Suppress("UNUSED_PARAMETER") user: FirebaseUser?) {
     }
 
     companion object {
