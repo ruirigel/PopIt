@@ -419,7 +419,7 @@ class MainActivity : AppCompatActivity() {
 
             buttons.animate()
                 .translationY(0f)
-                .setDuration(0)
+                .setDuration(200)
                 .start()
         }
 
