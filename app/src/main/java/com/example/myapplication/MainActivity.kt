@@ -19,6 +19,7 @@ import android.text.InputFilter
 import android.text.InputType
 import android.util.Log
 import android.view.animation.AnimationUtils
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -702,13 +703,15 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    @SuppressLint("InflateParams")
     private fun showscore() {
         if (isonline(this)) {
             try {
                 val rootRef = FirebaseDatabase.getInstance().reference
                 val usersRef = rootRef.child("data")
                 val builder = AlertDialog.Builder(this)
-                builder.setTitle("Top 10 of Global Score")
+                val customTitle = layoutInflater.inflate(R.layout.custom_dialog_title, null)
+                builder.setCustomTitle(customTitle)
                 usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val namesArray = arrayOf<String>()
@@ -729,7 +732,8 @@ class MainActivity : AppCompatActivity() {
                                 val (name, score) = element.split(" ")
                                 Pair(name, score.toInt())
                             }.toMutableList()
-                        val sortedList = nameAndScoreList.sortedByDescending { it.second }
+                        val sortedList =
+                            nameAndScoreList.sortedByDescending { it.second }//.take(10)
 
                         sortedList.forEachIndexed { index, (name, score) ->
                             val adjustedIndex = index + 1
@@ -737,50 +741,57 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         val sortedResult = namesList.toTypedArray()
-                        builder.setItems(sortedResult) { _, which ->
+
+                        val adapter = ArrayAdapter(
+                            this@MainActivity,
+                            R.layout.custom_list_item,
+                            sortedResult
+                        )
+
+                        builder.setAdapter(adapter) { _, which ->
                             when (which) {
-                                0 -> {
+                                0 -> { /* Handle item click */
                                 }
 
-                                1 -> {
+                                1 -> { /* Handle item click */
                                 }
 
-                                2 -> {
+                                2 -> { /* Handle item click */
                                 }
 
-                                3 -> {
+                                3 -> { /* Handle item click */
                                 }
 
-                                4 -> {
+                                4 -> { /* Handle item click */
                                 }
 
-                                5 -> {
+                                5 -> { /* Handle item click */
                                 }
 
-                                6 -> {
+                                6 -> { /* Handle item click */
                                 }
 
-                                7 -> {
+                                7 -> { /* Handle item click */
                                 }
 
-                                8 -> {
+                                8 -> { /* Handle item click */
                                 }
 
-                                9 -> {
+                                9 -> { /* Handle item click */
                                 }
                             }
                         }
+
                         builder.setNegativeButton("") { dialog, _ ->
                             dialog.cancel()
                         }
+
                         val dialog = builder.create()
                         dialog.window?.decorView?.setBackgroundResource(R.drawable.dialog_background)
                         dialog.show()
-
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        // Handle database read error
                         println("Error reading data: ${error.message}")
                     }
                 })
