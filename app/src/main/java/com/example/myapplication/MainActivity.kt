@@ -15,6 +15,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
 import android.telephony.TelephonyManager
+import android.text.Html
 import android.text.InputFilter
 import android.text.InputType
 import android.util.Log
@@ -416,7 +417,7 @@ class MainActivity : AppCompatActivity() {
             buttons.setBackgroundColor(Color.parseColor("#3F51B4"))
             buttons.isEnabled = true
             buttons.isClickable = true
-            buttons.text = null
+            buttons.text = " "
 
             buttons.animate()
                 .translationY(0f)
@@ -477,7 +478,7 @@ class MainActivity : AppCompatActivity() {
             numberstar = (minStarBubble..maxStarBubble).random()
             val buttonss = findViewById<Button>(buttonIds[numberstar])
             buttonss.setBackgroundColor(Color.YELLOW)
-            buttonss.text = "★"
+            buttonss.text = Html.fromHtml("<font color='#009688'>★</font>")
             buttonss.textSize = 44f
             buttonss.setTextColor(Color.parseColor("#2B2D30"))
             buttonss.startAnimation(AnimationUtils.loadAnimation(this, R.anim.shake))
@@ -619,7 +620,13 @@ class MainActivity : AppCompatActivity() {
                         if (scorevalue.isNotEmpty()) {
                             val numa: Int = scorevalue.toInt()
                             val numb: Int = arg1.toInt()
-                            val result = numa + numb
+
+                            val result: Int = if (numb == 0) {
+                                numa - 10
+                            } else {
+                                numa + numb
+                            }
+
                             val finalresult = result.toString()
                             myRef.child("score").setValue(finalresult)
 
@@ -628,7 +635,12 @@ class MainActivity : AppCompatActivity() {
                             val scorevaluenow: String = textView1.text.toString()
                             val numanow: Int = scorevaluenow.toInt()
                             val numbnow: Int = arg1.toInt()
-                            val resultnow = numbnow + numanow
+
+                            val resultnow: Int = if (numb == 0) {
+                                numanow - 10
+                            } else {
+                                numanow + numbnow
+                            }
                             textView1.text = resultnow.toString()
 
                             //delayscore(numanow, resultnow)
@@ -1000,6 +1012,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkButtonColor(arg1: CharSequence) {
         when (arg1) {
+            " " -> {
+                savescore("0")
+            }
+
             "+1" -> {
                 savescore("1")
             }
@@ -1068,7 +1084,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "AnonymousAuth"
     }
-
 
 }
 
