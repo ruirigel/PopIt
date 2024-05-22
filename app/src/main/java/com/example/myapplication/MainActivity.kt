@@ -95,6 +95,7 @@ class MainActivity : AppCompatActivity() {
             devicename()
             firsttime()
             savetimes()
+            monitorScores()
         } else {
             Toast.makeText(
                 this,
@@ -387,6 +388,7 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun generate() {
+
         if (numberofplays == 30) {
             numberofplays = 1
             plays()
@@ -752,7 +754,7 @@ class MainActivity : AppCompatActivity() {
                             namesList[index] = "$adjustedIndex - $name $score"
                         }
 
-                        val sortedResult = namesList.toTypedArray()
+                        val sortedResult = namesList.toTypedArray().take(10)
 
                         val adapter = ArrayAdapter(
                             this@MainActivity,
@@ -1083,6 +1085,72 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "AnonymousAuth"
+    }
+
+    private fun monitorScores() {
+        val database = FirebaseDatabase.getInstance()
+        val usersRef = database.getReference("data")
+        var topUser: Pair<String, Int>? = null
+        var topUserName: String? = null
+
+        usersRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                var highestScore = 0
+                var highestScoreUser: Pair<String, String>? = null
+
+                for (userSnapshot in snapshot.children) {
+                    val userId = userSnapshot.key ?: continue
+                    val userName =
+                        userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
+                    val scoreString = userSnapshot.child("score").getValue(String::class.java)
+                    val score = scoreString?.toIntOrNull() ?: 0
+
+                    if (score > highestScore) {
+                        highestScore = score
+                        highestScoreUser = Pair(userId, userName)
+                    }
+                }
+
+                highestScoreUser?.let { newTopUser ->
+                    topUser?.let { (oldUserId, oldScore) ->
+                        if (newTopUser.first != oldUserId && highestScore > oldScore) {
+                            topUserName?.let { oldUserName ->
+                                onTopUserOvertaken(
+                                    oldUserName,
+                                    oldScore,
+                                    newTopUser.second,
+                                    highestScore
+                                )
+                            }
+                        }
+                    } ?: run {
+                        topUser = Pair(newTopUser.first, highestScore)
+                        topUserName = newTopUser.second
+                    }
+
+                    topUser = Pair(newTopUser.first, highestScore)
+                    topUserName = newTopUser.second
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("ScoreActivity", "Database error: ${error.message}")
+            }
+        })
+    }
+
+    private fun onTopUserOvertaken(
+        oldUserName: String,
+        oldScore: Int,
+        newUserName: String,
+        newScore: Int
+    ) {
+        println("User $newUserName has reached first place now with a score of $newScore")
+        Toast.makeText(
+            this,
+            "User $newUserName has reached first place now with a score of $newScore",
+            Toast.LENGTH_LONG
+        ).show()
     }
 
 }
