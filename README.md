@@ -4,6 +4,6 @@ PopIt is a simple anti-stress game with wonderful Lofi beats in the background w
 # popit-releases
 This repository hosts the public releases of private popit repository. The releases(apk) are signed that you can deply to a device.
 
-<img src="./popit.jpg" width=30% height=30%>
+<img src="./popit.gif" width=30% height=30%>
 
 
