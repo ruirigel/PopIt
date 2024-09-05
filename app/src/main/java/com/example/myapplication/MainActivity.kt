@@ -53,7 +53,8 @@ import java.time.LocalDateTime
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
-    private val currentVersion = 20240903
+    private val currentVersion = 20240905
+
     private var timer: CountDownTimer? = null
     private var composer = "Track: Trell Daniels - "
     private val songList = listOf(
@@ -98,6 +99,7 @@ class MainActivity : AppCompatActivity() {
             firsttime()
             savetimes()
             monitorScores()
+            checkVersion()
 
         } else {
             Toast.makeText(
@@ -1016,32 +1018,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkButtonColor(arg1: CharSequence) {
-        when (arg1) {
-            " " -> {
+        when {
+            arg1 == " " -> {
                 savescore("0")
             }
 
-            "+1" -> {
+            arg1 == "+1" -> {
                 savescore("1")
             }
 
-            "+10" -> {
+            arg1 == "+10" -> {
                 savescore("10")
             }
 
-            "+15" -> {
+            arg1 == "+15" -> {
                 savescore("15")
             }
 
-            "+30" -> {
+            arg1 == "+30" -> {
                 savescore("30")
             }
 
-            "★" -> {
+            arg1.contains("★") -> {
+                Toast.makeText(this@MainActivity, "is a star", Toast.LENGTH_LONG).show()
                 savestars("1")
             }
         }
     }
+
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
@@ -1160,12 +1164,12 @@ class MainActivity : AppCompatActivity() {
 
                     withContext(Dispatchers.Main) {
                         if (remoteVersion != null && remoteVersion > currentVersion) {
-                            Toast.makeText(this@MainActivity, "New version available in repo: $remoteVersion", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@MainActivity, "New version available in the repo of this app. Version: $remoteVersion", Toast.LENGTH_LONG).show()
                         }
                     }
                 } else {
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "Error: failed to access remote file", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@MainActivity, "Error: failed to check for updates.", Toast.LENGTH_LONG).show()
                     }
                 }
 
