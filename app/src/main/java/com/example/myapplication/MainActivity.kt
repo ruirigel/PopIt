@@ -41,6 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -52,6 +53,7 @@ import java.time.LocalDateTime
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
+    private val currentVersion = 20240903
     private var timer: CountDownTimer? = null
     private var composer = "Track: Trell Daniels - "
     private val songList = listOf(
@@ -96,6 +98,7 @@ class MainActivity : AppCompatActivity() {
             firsttime()
             savetimes()
             monitorScores()
+
         } else {
             Toast.makeText(
                 this,
@@ -1137,6 +1140,42 @@ class MainActivity : AppCompatActivity() {
                 Log.e("ScoreActivity", "Database error: ${error.message}")
             }
         })
+    }
+
+    private fun checkVersion() {
+        val rawUrl = "https://raw.githubusercontent.com/ruirigel/popit/master/app/build.gradle.kts"
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val url = URL(rawUrl)
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+
+                if (connection.responseCode == 200) {
+                    val content = connection.inputStream.bufferedReader().use { it.readText() }
+
+                    val versionLine = content.lines().find { it.contains("versionCode") }
+
+                    val remoteVersion = versionLine?.substringAfter("versionCode =")?.trim()?.toIntOrNull()
+
+                    withContext(Dispatchers.Main) {
+                        if (remoteVersion != null && remoteVersion > currentVersion) {
+                            Toast.makeText(this@MainActivity, "New version available in repo: $remoteVersion", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Error: failed to access remote file", Toast.LENGTH_LONG).show()
+                    }
+                }
+
+                connection.disconnect()
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
     private fun onTopUserOvertaken(
