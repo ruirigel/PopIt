@@ -1,4 +1,4 @@
-<img src="./popitlogo.png" width=50% height=50%>
+<img src="./popitlogo.png" width=100% height=100%>
 
 # popit
 The PopIt app is based on physical bubble fidget toys.<br>
