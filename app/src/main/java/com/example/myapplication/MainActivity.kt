@@ -484,8 +484,8 @@ class MainActivity : AppCompatActivity() {
             val maxStarBubble = 17
             numberstar = (minStarBubble..maxStarBubble).random()
             val buttonss = findViewById<Button>(buttonIds[numberstar])
-            buttonss.setBackgroundColor(Color.YELLOW)
-            buttonss.text = Html.fromHtml("<font color='#009688'>★</font>")
+            buttonss.setBackgroundColor(Color.parseColor("#009688"))
+            buttonss.text = Html.fromHtml("<font color='#009688'>⭐</font>")
             buttonss.textSize = 44f
             buttonss.setTextColor(Color.parseColor("#2B2D30"))
             buttonss.startAnimation(AnimationUtils.loadAnimation(this, R.anim.shake))
@@ -544,10 +544,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun dropButton(arg1: Int) {
         val buttons = findViewById<Button>(arg1)
-        val animator = ObjectAnimator.ofFloat(buttons, "translationY", 0f, 3500f)
-        animator.duration = 500
+        val animator = ObjectAnimator.ofFloat(buttons, "translationY", 0f, 3000f)
+        animator.duration = 300
         animator.start()
-
     }
 
     @SuppressLint("HardwareIds")
@@ -1039,8 +1038,7 @@ class MainActivity : AppCompatActivity() {
                 savescore("30")
             }
 
-            arg1.contains("★") -> {
-                Toast.makeText(this@MainActivity, "is a star", Toast.LENGTH_LONG).show()
+            arg1.contains("⭐") -> {
                 savestars("1")
             }
         }
@@ -1095,88 +1093,103 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun monitorScores() {
-        val database = FirebaseDatabase.getInstance()
-        val usersRef = database.getReference("data")
-        var topUser: Pair<String, Int>? = null
-        var topUserName: String? = null
+        if (isonline(this)) {
+            val database = FirebaseDatabase.getInstance()
+            val usersRef = database.getReference("data")
+            var topUser: Pair<String, Int>? = null
+            var topUserName: String? = null
 
-        usersRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                var highestScore = 0
-                var highestScoreUser: Pair<String, String>? = null
+            usersRef.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    var highestScore = 0
+                    var highestScoreUser: Pair<String, String>? = null
 
-                for (userSnapshot in snapshot.children) {
-                    val userId = userSnapshot.key ?: continue
-                    val userName =
-                        userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
-                    val scoreString = userSnapshot.child("score").getValue(String::class.java)
-                    val score = scoreString?.toIntOrNull() ?: 0
+                    for (userSnapshot in snapshot.children) {
+                        val userId = userSnapshot.key ?: continue
+                        val userName =
+                            userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
+                        val scoreString = userSnapshot.child("score").getValue(String::class.java)
+                        val score = scoreString?.toIntOrNull() ?: 0
 
-                    if (score > highestScore) {
-                        highestScore = score
-                        highestScoreUser = Pair(userId, userName)
-                    }
-                }
-
-                highestScoreUser?.let { newTopUser ->
-                    topUser?.let { (oldUserId, oldScore) ->
-                        if (newTopUser.first != oldUserId && highestScore > oldScore) {
-                            topUserName?.let { oldUserName ->
-                                onTopUserOvertaken(
-                                    oldUserName,
-                                    oldScore,
-                                    newTopUser.second,
-                                    highestScore
-                                )
-                            }
+                        if (score > highestScore) {
+                            highestScore = score
+                            highestScoreUser = Pair(userId, userName)
                         }
-                    } ?: run {
+                    }
+
+                    highestScoreUser?.let { newTopUser ->
+                        topUser?.let { (oldUserId, oldScore) ->
+                            if (newTopUser.first != oldUserId && highestScore > oldScore) {
+                                topUserName?.let { oldUserName ->
+                                    onTopUserOvertaken(
+                                        oldUserName,
+                                        oldScore,
+                                        newTopUser.second,
+                                        highestScore
+                                    )
+                                }
+                            }
+                        } ?: run {
+                            topUser = Pair(newTopUser.first, highestScore)
+                            topUserName = newTopUser.second
+                        }
+
                         topUser = Pair(newTopUser.first, highestScore)
                         topUserName = newTopUser.second
                     }
-
-                    topUser = Pair(newTopUser.first, highestScore)
-                    topUserName = newTopUser.second
                 }
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("ScoreActivity", "Database error: ${error.message}")
-            }
-        })
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("ScoreActivity", "Database error: ${error.message}")
+                }
+            })
+        }
     }
 
     private fun checkVersion() {
-        val rawUrl = "https://raw.githubusercontent.com/ruirigel/popit/master/app/build.gradle.kts"
+        if (isonline(this)) {
+            val rawUrl =
+                "https://raw.githubusercontent.com/ruirigel/popit/master/app/build.gradle.kts"
 
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val url = URL(rawUrl)
-                val connection = url.openConnection() as HttpURLConnection
-                connection.requestMethod = "GET"
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val url = URL(rawUrl)
+                    val connection = url.openConnection() as HttpURLConnection
+                    connection.requestMethod = "GET"
 
-                if (connection.responseCode == 200) {
-                    val content = connection.inputStream.bufferedReader().use { it.readText() }
+                    if (connection.responseCode == 200) {
+                        val content = connection.inputStream.bufferedReader().use { it.readText() }
 
-                    val versionLine = content.lines().find { it.contains("versionCode") }
+                        val versionLine = content.lines().find { it.contains("versionCode") }
 
-                    val remoteVersion = versionLine?.substringAfter("versionCode =")?.trim()?.toIntOrNull()
+                        val remoteVersion =
+                            versionLine?.substringAfter("versionCode =")?.trim()?.toIntOrNull()
 
-                    withContext(Dispatchers.Main) {
-                        if (remoteVersion != null && remoteVersion > currentVersion) {
-                            Toast.makeText(this@MainActivity, "New version available in the repo of this app. Version: $remoteVersion", Toast.LENGTH_LONG).show()
+                        withContext(Dispatchers.Main) {
+                            if (remoteVersion != null && remoteVersion > currentVersion) {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "New version available in the repo of this app. Version: $remoteVersion",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Error: failed to check for updates.",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "Error: failed to check for updates.", Toast.LENGTH_LONG).show()
-                    }
-                }
 
-                connection.disconnect()
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                    connection.disconnect()
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG)
+                            .show()
+                    }
                 }
             }
         }
@@ -1188,7 +1201,6 @@ class MainActivity : AppCompatActivity() {
         newUserName: String,
         newScore: Int
     ) {
-        println("User $newUserName has reached first place now with a score of $newScore")
         Toast.makeText(
             this,
             "User $newUserName has reached first place now with a score of $newScore",
