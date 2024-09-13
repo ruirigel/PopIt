@@ -11,6 +11,7 @@ This repository hosts the public releases. The releases(apk) are signed that you
 * Symbol and numbers: Numbers and other icons on the interface, such as music notes, a chronometer, numbers and stars are used to indicate features intuitively.
 * Background music: Lofi beats in the background while you generate sequences of bubbles.
 * Score board: To compete with other users online.
+* User profile: To view more details about the specific user.
 * Modern Interface: Interesting for casual users, offering an affordable and friendly interface.
 
 <img src="./popit.gif" width=30% height=30%> <img src="./scoreboard.jpg" width=30% height=30%> <img src="./userprofile.jpg" width=30% height=30%>
