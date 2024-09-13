@@ -512,7 +512,6 @@ class MainActivity : AppCompatActivity() {
         timer = object : CountDownTimer(4000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 btnClick38.text = (millisUntilFinished / 1000).toString()
-                val seconds = (millisUntilFinished / 1000).toInt()
                 fastSequence = 4000 - millisUntilFinished.toInt()
 
                 when (btnClick38.text) {
@@ -623,8 +622,11 @@ class MainActivity : AppCompatActivity() {
                         myRef.child("fast_sequence").setValue(newFastSequence)
                             .addOnSuccessListener {
                             }.addOnFailureListener { exception ->
-                            Log.e("saveFastSequence", "Error updating value: ${exception.message}")
-                        }
+                                Log.e(
+                                    "saveFastSequence",
+                                    "Error updating value: ${exception.message}"
+                                )
+                            }
                     }
                 }.addOnFailureListener { exception ->
                     Log.e(
@@ -810,7 +812,7 @@ class MainActivity : AppCompatActivity() {
                         val top10List = sortedList.take(10)
 
                         val formattedList = top10List.mapIndexed { index, (name) ->
-                            "${index + 1} - $name"
+                            "${index + 1} - $name..."
                         }
 
                         val adapter = ArrayAdapter(
@@ -871,9 +873,9 @@ class MainActivity : AppCompatActivity() {
                         snapshot.child("fast_sequence").getValue(String::class.java) ?: "N/A"
 
                     val times = snapshot.child("times").let {
-                        when {
-                            it.value is Long -> it.value.toString()
-                            it.value is String -> it.value
+                        when (it.value) {
+                            is Long -> it.value.toString()
+                            is String -> it.value
                             else -> "N/A"
                         }
                     }
