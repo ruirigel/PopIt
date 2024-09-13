@@ -11,6 +11,8 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
@@ -24,6 +26,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -53,7 +56,7 @@ import java.time.LocalDateTime
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
-    private val currentVersion = 20240905
+    private val currentVersion = 20240910
 
     private var timer: CountDownTimer? = null
     private var composer = "Track: Trell Daniels - "
@@ -77,8 +80,10 @@ class MainActivity : AppCompatActivity() {
     private var numbero = 0
     private var numberg = 0
     private var numberstar = 0
+    private val totalGreenButtons = 8
+    private var numberofgreenbubblesclicket = 0
+    private var fastSequence = 0
     private lateinit var auth: FirebaseAuth
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -336,6 +341,9 @@ class MainActivity : AppCompatActivity() {
                 mpb.start()
             }
             vibratePhone()
+            if (numberofgreenbubblesclicket == totalGreenButtons) {
+                saveFastSequence(fastSequence.toString())
+            }
             generate()
             btnClick38.setBackgroundColor(Color.parseColor("#3F51B4"))
             btnClick38.startAnimation(AnimationUtils.loadAnimation(this, R.anim.shake))
@@ -432,14 +440,15 @@ class MainActivity : AppCompatActivity() {
                 .start()
         }
 
+        numberofgreenbubblesclicket = 0
         val min = 0
         val max = 17
-        for (i in 0..7) {
-            val number = (min..max).random()
-            val buttons = findViewById<Button>(buttonIds[number])
-            buttons.setBackgroundColor(Color.GREEN)
-            buttons.text = "+1"
-            buttons.setTextColor(Color.GREEN)
+        val randomIndices = (min..max).shuffled().take(totalGreenButtons)
+        for (index in randomIndices) {
+            val button = findViewById<Button>(buttonIds[index])
+            button.setBackgroundColor(Color.GREEN)
+            button.text = "+1"
+            button.setTextColor(Color.GREEN)
         }
         val mpbs = MediaPlayer.create(this, R.raw.colorbubbles)
         if (numberofplays == redrandomofplays) {
@@ -503,6 +512,9 @@ class MainActivity : AppCompatActivity() {
         timer = object : CountDownTimer(4000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 btnClick38.text = (millisUntilFinished / 1000).toString()
+                val seconds = (millisUntilFinished / 1000).toInt()
+                fastSequence = 4000 - millisUntilFinished.toInt()
+
                 when (btnClick38.text) {
                     0.toString() -> btnClick38.setBackgroundColor(Color.parseColor("#ff0000"))
                     1.toString() -> btnClick38.setBackgroundColor(Color.parseColor("#ffa700"))
@@ -595,6 +607,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("HardwareIds")
+    private fun saveFastSequence(newFastSequence: String) {
+        if (isonline(this)) {
+            try {
+                val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                val database = Firebase.database
+                val myRef = database.getReference("/data/$id")
+
+                myRef.child("fast_sequence").get().addOnSuccessListener { snapshot ->
+                    val currentFastSequenceStr = snapshot.getValue(String::class.java)
+                    val currentFastSequence =
+                        currentFastSequenceStr?.toDoubleOrNull() ?: Double.MAX_VALUE
+                    val newFastSequenceValue = newFastSequence.toDoubleOrNull() ?: Double.MAX_VALUE
+                    if (newFastSequenceValue < currentFastSequence) {
+                        myRef.child("fast_sequence").setValue(newFastSequence)
+                            .addOnSuccessListener {
+                            }.addOnFailureListener { exception ->
+                            Log.e("saveFastSequence", "Error updating value: ${exception.message}")
+                        }
+                    }
+                }.addOnFailureListener { exception ->
+                    Log.e(
+                        "saveFastSequence",
+                        "Error reading current fast_sequence: ${exception.message}"
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("saveFastSequence", "Error: ${e.message}")
+            }
+        }
+    }
+
+    @SuppressLint("HardwareIds")
     private fun savecountrycode(arg1: String) {
         if (isonline(this)) {
             try {
@@ -648,6 +692,12 @@ class MainActivity : AppCompatActivity() {
                                 numanow + numbnow
                             }
                             textView1.text = resultnow.toString()
+
+                            if (textView1.text.contains("-")) {
+                                textView1.setTextColor(Color.parseColor("#FF0000"))
+                            } else {
+                                textView1.setTextColor(Color.parseColor("#009688"))
+                            }
 
                             //delayscore(numanow, resultnow)
 
@@ -720,7 +770,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     @SuppressLint("InflateParams")
     private fun showscore() {
         if (isonline(this)) {
@@ -732,75 +781,53 @@ class MainActivity : AppCompatActivity() {
                 builder.setCustomTitle(customTitle)
                 usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val namesArray = arrayOf<String>()
-                        val namesList = namesArray.toMutableList()
+                        val namesList = mutableListOf<String>()
+                        val nameToUserIdMap = mutableMapOf<String, String>()
 
                         for (userSnapshot in snapshot.children) {
+                            val userId = userSnapshot.key
                             if (userSnapshot.child("name").exists() && userSnapshot.child("score")
                                     .exists()
                             ) {
                                 val name = userSnapshot.child("name").getValue(String::class.java)
-                                val score = userSnapshot.child("score").getValue(String::class.java)
-                                namesList.add("$name $score")
+                                val scoreStr =
+                                    userSnapshot.child("score").getValue(String::class.java)
+
+                                if (name != null && scoreStr != null && userId != null) {
+                                    val score = scoreStr.toIntOrNull() ?: 0
+                                    namesList.add("$name $score")
+                                    nameToUserIdMap[name] = userId
+                                }
                             }
                         }
 
-                        val nameAndScoreList: MutableList<Pair<String, Int>> =
-                            namesList.map { element ->
-                                val (name, score) = element.split(" ")
-                                Pair(name, score.toInt())
-                            }.toMutableList()
-                        val sortedList =
-                            nameAndScoreList.sortedByDescending { it.second }//.take(10)
+                        val sortedList = namesList.map { element ->
+                            val (name, scoreStr) = element.split(" ")
+                            val score = scoreStr.toIntOrNull() ?: 0
+                            Pair(name, score)
+                        }.sortedByDescending { it.second }
 
-                        sortedList.forEachIndexed { index, (name, score) ->
-                            val adjustedIndex = index + 1
-                            namesList[index] = "$adjustedIndex - $name $score"
+                        val top10List = sortedList.take(10)
+
+                        val formattedList = top10List.mapIndexed { index, (name) ->
+                            "${index + 1} - $name"
                         }
-
-                        val sortedResult = namesList.toTypedArray().take(10)
 
                         val adapter = ArrayAdapter(
                             this@MainActivity,
                             R.layout.custom_list_item,
-                            sortedResult
+                            formattedList.toTypedArray()
                         )
 
                         builder.setAdapter(adapter) { _, which ->
-                            when (which) {
-                                0 -> { /* Handle item click */
-                                }
-
-                                1 -> { /* Handle item click */
-                                }
-
-                                2 -> { /* Handle item click */
-                                }
-
-                                3 -> { /* Handle item click */
-                                }
-
-                                4 -> { /* Handle item click */
-                                }
-
-                                5 -> { /* Handle item click */
-                                }
-
-                                6 -> { /* Handle item click */
-                                }
-
-                                7 -> { /* Handle item click */
-                                }
-
-                                8 -> { /* Handle item click */
-                                }
-
-                                9 -> { /* Handle item click */
-                                }
+                            val selectedName = top10List[which].first
+                            val userId = nameToUserIdMap[selectedName]
+                            if (userId != null) {
+                                showUserProfileDialog(userId)
                             }
                         }
 
-                        builder.setNegativeButton("") { dialog, _ ->
+                        builder.setNegativeButton("Close") { dialog, _ ->
                             dialog.cancel()
                         }
 
@@ -819,11 +846,71 @@ class MainActivity : AppCompatActivity() {
         } else {
             Toast.makeText(
                 this,
-                "No internet connection. To see the score table you need an internet connection.",
+                "No internet connection. To see the score board.",
                 Toast.LENGTH_LONG
             ).show()
         }
     }
+
+    private fun showUserProfileDialog(userId: String) {
+        val rootRef = FirebaseDatabase.getInstance().reference
+        val userRef = rootRef.child("data").child(userId)
+
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                try {
+                    val builder = AlertDialog.Builder(this@MainActivity)
+                    val customTitle =
+                        layoutInflater.inflate(R.layout.custom_dialog_title_profile, null)
+                    builder.setCustomTitle(customTitle)
+
+                    val name = snapshot.child("name").getValue(String::class.java) ?: "N/A"
+                    val score = snapshot.child("score").getValue(String::class.java) ?: "N/A"
+                    val stars = snapshot.child("stars").getValue(String::class.java) ?: "N/A"
+                    val fastSequence =
+                        snapshot.child("fast_sequence").getValue(String::class.java) ?: "N/A"
+
+                    val times = snapshot.child("times").let {
+                        when {
+                            it.value is Long -> it.value.toString()
+                            it.value is String -> it.value
+                            else -> "N/A"
+                        }
+                    }
+
+                    val message = """
+                    <b>Username:</b> $name<br><br>
+                    <b>Score:</b> $score pts<br><br>
+                    <b>Stars:</b> $stars<br><br>
+                    <b>Fast sequence ever:</b> $fastSequence ms<br><br>
+                    <b>Times played:</b> $times
+                """.trimIndent()
+
+                    builder.setMessage(Html.fromHtml(message))
+
+                    builder.setPositiveButton("Close") { dialog, _ ->
+                        dialog.dismiss()
+                        Handler(Looper.getMainLooper()).post {
+                            showscore()
+                        }
+                    }
+
+                    val dialog = builder.create()
+                    dialog.window?.decorView?.setBackgroundResource(R.drawable.dialog_background)
+                    dialog.show()
+
+                } catch (e: Exception) {
+                    Log.e("showUserProfileDialog", "Error showing the profile: ${e.message}")
+                    e.printStackTrace()
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("showUserProfileDialog", "Error accessing user data: ${error.message}")
+            }
+        })
+    }
+
 
     @SuppressLint("HardwareIds")
     private fun getpublicipaddress() {
@@ -927,13 +1014,15 @@ class MainActivity : AppCompatActivity() {
                     myRef.child("score").setValue("0")
                     myRef.child("times").setValue("1")
                     myRef.child("stars").setValue("0")
+                    myRef.child("fast_sequence").setValue("4000")
+
                 }
                 builder.setNegativeButton("Cancel") { dialog, _ ->
                     myRef.child("name").setValue("guest$currentTimeMillis")
                     myRef.child("score").setValue("0")
                     myRef.child("times").setValue("1")
                     myRef.child("stars").setValue("0")
-
+                    myRef.child("fast_sequence").setValue("4000")
 
                     dialog.cancel()
                 }
@@ -1017,28 +1106,85 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkButtonColor(arg1: CharSequence) {
+        val imageView: ImageView = findViewById(R.id.imageView)
+        val textView2: TextView = findViewById(R.id.textView2)
+        val textView1: TextView = findViewById(R.id.textView1)
+        val imageView2: ImageView = findViewById(R.id.imageView2)
+        val fadeInOut = AnimationUtils.loadAnimation(this, R.anim.fade_in_out_score)
+
         when {
             arg1 == " " -> {
+                imageView2.startAnimation(fadeInOut)
+                textView1.startAnimation(fadeInOut)
                 savescore("0")
             }
 
             arg1 == "+1" -> {
+                numberofgreenbubblesclicket++
                 savescore("1")
             }
 
             arg1 == "+10" -> {
+                imageView2.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this,
+                        R.anim.fade_in_out_score
+                    )
+                )
+                textView1.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this,
+                        R.anim.fade_in_out_score
+                    )
+                )
                 savescore("10")
             }
 
             arg1 == "+15" -> {
+                imageView2.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this,
+                        R.anim.fade_in_out_score
+                    )
+                )
+                textView1.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this,
+                        R.anim.fade_in_out_score
+                    )
+                )
                 savescore("15")
             }
 
             arg1 == "+30" -> {
+                imageView2.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this,
+                        R.anim.fade_in_out_score
+                    )
+                )
+                textView1.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this,
+                        R.anim.fade_in_out_score
+                    )
+                )
                 savescore("30")
             }
 
             arg1.contains("⭐") -> {
+                imageView.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this,
+                        R.anim.fade_in_out_score
+                    )
+                )
+                textView2.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this,
+                        R.anim.fade_in_out_score
+                    )
+                )
                 savestars("1")
             }
         }
