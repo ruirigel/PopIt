@@ -56,7 +56,7 @@ import java.time.LocalDateTime
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
-    private val currentVersion = 20240910
+    private val currentVersion = 20240913
 
     private var timer: CountDownTimer? = null
     private var composer = "Track: Trell Daniels - "
