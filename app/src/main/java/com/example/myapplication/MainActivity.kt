@@ -1,5 +1,8 @@
+@file:Suppress("unused")
+
 package com.example.myapplication
 
+import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
@@ -510,17 +513,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun mcountdown() {
         val btnClick38 = findViewById<Button>(R.id.button38)
-        timer = object : CountDownTimer(4000, 1000) {
+        timer = object : CountDownTimer(4000, 100) {
             override fun onTick(millisUntilFinished: Long) {
                 btnClick38.text = (millisUntilFinished / 1000).toString()
                 fastSequence = 4000 - millisUntilFinished.toInt()
-
-                when (btnClick38.text) {
-                    0.toString() -> btnClick38.setBackgroundColor(Color.parseColor("#ff0000"))
-                    1.toString() -> btnClick38.setBackgroundColor(Color.parseColor("#ffa700"))
-                    2.toString() -> btnClick38.setBackgroundColor(Color.parseColor("#fff400"))
-                    3.toString() -> btnClick38.setBackgroundColor(Color.parseColor("#a3ff00"))
-                }
+                val totalTime = 4000
+                val fraction = 1 - (millisUntilFinished.toFloat() / totalTime)
+                val startColor = Color.parseColor("#00FF00")
+                val endColor = Color.parseColor("#FF0000")
+                val evaluator = ArgbEvaluator()
+                val currentColor = evaluator.evaluate(fraction, startColor, endColor) as Int
+                btnClick38.setBackgroundColor(currentColor)
             }
 
             override fun onFinish() {
@@ -875,6 +878,7 @@ class MainActivity : AppCompatActivity() {
         val userRef = rootRef.child("data").child(userId)
 
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            @SuppressLint("InflateParams")
             override fun onDataChange(snapshot: DataSnapshot) {
                 try {
                     val builder = AlertDialog.Builder(this@MainActivity)
