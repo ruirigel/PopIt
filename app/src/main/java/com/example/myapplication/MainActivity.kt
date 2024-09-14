@@ -21,6 +21,8 @@ import android.text.Html
 import android.text.InputFilter
 import android.text.InputType
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -780,7 +782,7 @@ class MainActivity : AppCompatActivity() {
                 builder.setCustomTitle(customTitle)
                 usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val namesList = mutableListOf<String>()
+                        val namesList = mutableListOf<Pair<String, Int>>()
                         val nameToUserIdMap = mutableMapOf<String, String>()
 
                         for (userSnapshot in snapshot.children) {
@@ -794,29 +796,43 @@ class MainActivity : AppCompatActivity() {
 
                                 if (name != null && scoreStr != null && userId != null) {
                                     val score = scoreStr.toIntOrNull() ?: 0
-                                    namesList.add("$name $score")
+                                    namesList.add(Pair(name, score))
                                     nameToUserIdMap[name] = userId
                                 }
                             }
                         }
 
-                        val sortedList = namesList.map { element ->
-                            val (name, scoreStr) = element.split(" ")
-                            val score = scoreStr.toIntOrNull() ?: 0
-                            Pair(name, score)
-                        }.sortedByDescending { it.second }
+                        val sortedList = namesList.sortedByDescending { it.second }
+                        val top10List = sortedList.take(7)
 
-                        val top10List = sortedList.take(10)
-
-                        val formattedList = top10List.mapIndexed { index, (name) ->
-                            "${index + 1} - $name..."
-                        }
-
-                        val adapter = ArrayAdapter(
+                        val adapter = object : ArrayAdapter<Pair<String, Int>>(
                             this@MainActivity,
                             R.layout.custom_list_item,
-                            formattedList.toTypedArray()
-                        )
+                            top10List
+                        ) {
+                            override fun getView(
+                                position: Int,
+                                convertView: View?,
+                                parent: ViewGroup
+                            ): View {
+                                val view = convertView ?: layoutInflater.inflate(
+                                    R.layout.custom_list_item,
+                                    null
+                                )
+
+                                val nameTextView = view.findViewById<TextView>(R.id.nameTextView)
+                                val scoreTextView = view.findViewById<TextView>(R.id.scoreTextView)
+                                val rankTextView = view.findViewById<TextView>(R.id.rankTextView)
+
+                                val (name, score) = top10List[position]
+
+                                nameTextView.text = name
+                                scoreTextView.text = getString(R.string.score_text, score)
+                                rankTextView.text = getString(R.string.rank_text, position + 1)
+
+                                return view
+                            }
+                        }
 
                         builder.setAdapter(adapter) { _, which ->
                             val selectedName = top10List[which].first
@@ -838,7 +854,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        println("Error reading data: ${error.message}")
+                        Log.e("showScore", "Error reading data: ${error.message}")
                     }
                 })
             } catch (e: Exception) {
@@ -852,6 +868,7 @@ class MainActivity : AppCompatActivity() {
             ).show()
         }
     }
+
 
     private fun showUserProfileDialog(userId: String) {
         val rootRef = FirebaseDatabase.getInstance().reference
@@ -880,12 +897,12 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     val message = """
-                    <b>Username:</b> $name<br><br>
-                    <b>Score:</b> $score pts<br><br>
-                    <b>Stars:</b> $stars<br><br>
-                    <b>Fast sequence ever:</b> $fastSequence ms<br><br>
-                    <b>Times played:</b> $times
-                """.trimIndent()
+    <font color="#808080">Username:<b></font> $name</b><br><br>
+    <font color="#808080">Score:<b></font> $score </b>pts<br><br>
+    <font color="#808080">Stars:<b></font> $stars</b><br><br>
+    <font color="#808080">Fast sequence ever:<b></font> $fastSequence </b><font color="#808080">ms</font><br><br>
+    <font color="#808080">Times played:<b></font> $times</b>
+""".trimIndent()
 
                     builder.setMessage(Html.fromHtml(message))
 

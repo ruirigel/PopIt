@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:padding="16dp"
     android:gravity="center"
-    android:text="Top 10 of Global Score"
+    android:text="Top 7 of Global Score"
     android:textColor="#009688"
     android:textSize="20sp"
     android:textStyle="bold"
