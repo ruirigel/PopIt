@@ -19,3 +19,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+## Background Music
+
+The music used in this application has been generously provided by Trell Daniels. All rights to these tracks belong to the original author. The music is used with explicit permission from the author and cannot be distributed without authorization.
+
+### Copyright Information:
+- Author: Trell Daniels
+- Website or Social Media of the Author: https://open.spotify.com/intl-pt/artist/1CEqyczKKYNhzgqCjH7G7Q?si=X1acvEsNSZChSTgU7it3AA
+
+Please respect the author's rights when using this application.
