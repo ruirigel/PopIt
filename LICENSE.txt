@@ -24,7 +24,7 @@ SOFTWARE.
 
 ## Background Music
 
-The music used in this application has been generously provided by Trell Daniels. All rights to these tracks belong to the original author. The music is used with explicit permission from the author and cannot be copied or distributed without authorization.
+The music used in this application has been generously provided by Trell Daniels. All rights to these tracks belong to the original author. The music is used with explicit permission from the author and cannot be distributed without authorization.
 
 ### Copyright Information:
 - Author: Trell Daniels
