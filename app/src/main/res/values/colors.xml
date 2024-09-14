@@ -5,4 +5,5 @@
     <color name="statusBarColor">#2B2D30</color>
     <color name="splash_color">#2B2D30</color>
     <color name="navigationBar_color">#2B2D30</color>
+    <color name="dialog_buttons">#009688</color>
 </resources>

@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             Toast.makeText(
                 this,
-                "No internet connection. Not having an internet connection does not invalidate playing on the app, it will just stop adding up the score.",
+                "No internet connection. Not having an internet connection does not invalidate playing on the app, it will just stop adding up the score board.",
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -117,7 +117,6 @@ class MainActivity : AppCompatActivity() {
         var mpb = MediaPlayer.create(this, R.raw.popit)
         playSong(songList, 0)
         plays()
-        //generate()
 
         val btnClick20 = findViewById<Button>(R.id.button20)
         btnClick20.setOnClickListener {
@@ -719,7 +718,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun delayscore(arg1: Int, arg2: Int) {
         val textView1: TextView = findViewById(R.id.textView1)
         CoroutineScope(Dispatchers.Main).launch {
@@ -729,7 +727,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
     @SuppressLint("HardwareIds")
     @Suppress("SameParameterValue")
@@ -836,6 +833,8 @@ class MainActivity : AppCompatActivity() {
                         val dialog = builder.create()
                         dialog.window?.decorView?.setBackgroundResource(R.drawable.dialog_background)
                         dialog.show()
+                        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                            .setTextColor(getResources().getColor(R.color.dialog_buttons))
                     }
 
                     override fun onCancelled(error: DatabaseError) {
@@ -890,7 +889,7 @@ class MainActivity : AppCompatActivity() {
 
                     builder.setMessage(Html.fromHtml(message))
 
-                    builder.setPositiveButton("Close") { dialog, _ ->
+                    builder.setNegativeButton("Close") { dialog, _ ->
                         dialog.dismiss()
                         Handler(Looper.getMainLooper()).post {
                             showscore()
@@ -900,6 +899,8 @@ class MainActivity : AppCompatActivity() {
                     val dialog = builder.create()
                     dialog.window?.decorView?.setBackgroundResource(R.drawable.dialog_background)
                     dialog.show()
+                    dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                        .setTextColor(getResources().getColor(R.color.dialog_buttons))
 
                 } catch (e: Exception) {
                     Log.e("showUserProfileDialog", "Error showing the profile: ${e.message}")
@@ -912,7 +913,6 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
-
 
     @SuppressLint("HardwareIds")
     private fun getpublicipaddress() {
@@ -1032,9 +1032,9 @@ class MainActivity : AppCompatActivity() {
                 dialog.window?.decorView?.setBackgroundResource(R.drawable.dialog_background)
                 dialog.show()
                 dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
-                    .setTextColor(getResources().getColor(R.color.white))
+                    .setTextColor(getResources().getColor(R.color.dialog_buttons))
                 dialog.getButton(DialogInterface.BUTTON_POSITIVE)
-                    .setTextColor(getResources().getColor(R.color.white))
+                    .setTextColor(getResources().getColor(R.color.dialog_buttons))
 
             } catch (e: Exception) {
                 Log.e("askForUsername", "Error: ${e.message}")
@@ -1191,7 +1191,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
@@ -1351,7 +1350,7 @@ class MainActivity : AppCompatActivity() {
     ) {
         Toast.makeText(
             this,
-            "User $newUserName has reached first place now with a score of $newScore",
+            "User $newUserName has reached first place now with a score of $newScore pts",
             Toast.LENGTH_LONG
         ).show()
     }
