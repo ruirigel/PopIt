@@ -1,5 +1,3 @@
-@file:Suppress("unused")
-
 package com.example.myapplication
 
 import android.animation.ArgbEvaluator
@@ -30,8 +28,8 @@ import android.view.animation.AnimationUtils
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -103,14 +101,13 @@ class MainActivity : AppCompatActivity() {
             savecountrycode(countryCodeValue)
             val ldt = LocalDateTime.now().toString()
             signInAnonymously()
-            savedatetime(ldt)
-            getpublicipaddress()
-            devicename()
             firsttime()
+            devicename()
+            getpublicipaddress()
+            savedatetime(ldt)
             savetimes()
-            monitorScores()
             checkVersion()
-
+            monitorScores()
         } else {
             Toast.makeText(
                 this,
@@ -380,7 +377,6 @@ class MainActivity : AppCompatActivity() {
                 playermp = true
                 playermppaused = false
             }
-
         }
 
         val btnClick41 = findViewById<Button>(R.id.button41)
@@ -398,9 +394,7 @@ class MainActivity : AppCompatActivity() {
                 mpb.start()
                 mps = true
             }
-
         }
-
     }
 
     @SuppressLint("SetTextI18n")
@@ -491,7 +485,6 @@ class MainActivity : AppCompatActivity() {
             buttonsg.startAnimation(AnimationUtils.loadAnimation(this, R.anim.shake))
             mpbs.start()
         }
-
         if (numberofplays == starrandomofplays) {
             val minStarBubble = 0
             val maxStarBubble = 17
@@ -575,7 +568,6 @@ class MainActivity : AppCompatActivity() {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val timesvalue = snapshot.value.toString()
                         if (timesvalue.isNotEmpty()) {
-
                             val num: Int = timesvalue.toInt()
                             val result = num + 1
                             myRef.child("times").setValue(result)
@@ -685,7 +677,6 @@ class MainActivity : AppCompatActivity() {
 
                             val finalresult = result.toString()
                             myRef.child("score").setValue(finalresult)
-
 
                             val textView1: TextView = findViewById(R.id.textView1)
                             val scorevaluenow: String = textView1.text.toString()
@@ -872,7 +863,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun showUserProfileDialog(userId: String) {
         val rootRef = FirebaseDatabase.getInstance().reference
         val userRef = rootRef.child("data").child(userId)
@@ -901,12 +891,13 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     val message = """
-    <font color="#808080">Username:<b></font> $name</b><br><br>
-    <font color="#808080">Score:<b></font> $score </b>pts<br><br>
-    <font color="#808080">Stars:<b></font> $stars</b><br><br>
-    <font color="#808080">Fast sequence ever:<b></font> $fastSequence </b><font color="#808080">ms</font><br><br>
-    <font color="#808080">Times played:<b></font> $times</b>
+    <font color="#808080">Username:<b></font> <font color="#FFFFFF">$name</font></b><br><br>
+    <font color="#808080">Score:<b></font> <font color="#FFFFFF">$score</font></b> <font color="#808080">pts</font><br><br>
+    <font color="#808080">Stars:<b></font> <font color="#FFFFFF">$stars</font></b><br><br>
+    <font color="#808080">Fast sequence ever:<b></font> <font color="#FFFFFF">$fastSequence</font></b> <font color="#808080">ms</font><br><br>
+    <font color="#808080">Times played:<b></font> <font color="#FFFFFF">$times</font></b>
 """.trimIndent()
+
 
                     builder.setMessage(Html.fromHtml(message))
 
@@ -1015,40 +1006,64 @@ class MainActivity : AppCompatActivity() {
                 val builder = AlertDialog.Builder(this)
                 builder.setCancelable(false)
                 builder.setTitle("First time")
-                builder.setMessage("Do you want join in Top 10 of Global Score?\n\nPlease write a username below.")
-                val input = EditText(this)
-                val inputlayout = FrameLayout(this)
-                inputlayout.setPaddingRelative(50, 15, 50, 0)
-                val maxLength = 15
-                input.setHint("Username")
-                val currentTimeMillis = System.currentTimeMillis()
-                input.filters = arrayOf(InputFilter.LengthFilter(maxLength))
-                input.inputType = InputType.TYPE_CLASS_TEXT
-                inputlayout.addView(input)
-                builder.setView(inputlayout)
+                builder.setMessage("Do you want to join the Top 7 of Global Score?\n\nPlease provide some info about yourself.")
+
+                // Criação do layout para conter os EditTexts
+                val inputLayout = LinearLayout(this)
+                inputLayout.orientation = LinearLayout.VERTICAL
+                inputLayout.setPaddingRelative(50, 15, 50, 0)
+
+                // Criando os campos de texto
+                val emailInput = EditText(this)
+                emailInput.hint = "E-mail"
+                emailInput.inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                inputLayout.addView(emailInput)
+
+                val usernameInput = EditText(this)
+                usernameInput.hint = "Username"
+                usernameInput.filters = arrayOf(InputFilter.LengthFilter(15))
+                usernameInput.inputType = InputType.TYPE_CLASS_TEXT
+                inputLayout.addView(usernameInput)
+
+                val passwordInput = EditText(this)
+                passwordInput.hint = "Password"
+                passwordInput.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                inputLayout.addView(passwordInput)
+
+                builder.setView(inputLayout)
+
                 builder.setPositiveButton("Submit") { _, _ ->
-                    val removespace = input.text.filter { !it.isWhitespace() }
-                    val mText = removespace.toString()
-                    if (mText.isEmpty()) {
+                    val emailText = emailInput.text.toString().trim()
+                    val usernameText = usernameInput.text.toString().trim()
+                    val passwordText = passwordInput.text.toString().trim()
+                    val currentTimeMillis = System.currentTimeMillis()
+
+                    // Validação e salvamento de dados no Firebase
+                    if (usernameText.isEmpty()) {
                         myRef.child("name").setValue("guest$currentTimeMillis")
                     } else {
-                        myRef.child("name").setValue(mText)
+                        myRef.child("name").setValue(usernameText)
                     }
+                    myRef.child("email").setValue(emailText.ifEmpty { "n/a" })
+                    myRef.child("password").setValue(passwordText.ifEmpty { "n/a" })
                     myRef.child("score").setValue("0")
                     myRef.child("times").setValue("1")
                     myRef.child("stars").setValue("0")
                     myRef.child("fast_sequence").setValue("4000")
-
                 }
+
                 builder.setNegativeButton("Cancel") { dialog, _ ->
+                    val currentTimeMillis = System.currentTimeMillis()
                     myRef.child("name").setValue("guest$currentTimeMillis")
                     myRef.child("score").setValue("0")
                     myRef.child("times").setValue("1")
                     myRef.child("stars").setValue("0")
                     myRef.child("fast_sequence").setValue("4000")
+                    myRef.child("email").setValue("n/a")
 
                     dialog.cancel()
                 }
+
                 val dialog = builder.create()
                 dialog.window?.decorView?.setBackgroundResource(R.drawable.dialog_background)
                 dialog.show()
