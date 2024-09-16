@@ -872,16 +872,15 @@ class MainActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 try {
                     val builder = AlertDialog.Builder(this@MainActivity)
-                    val customTitle =
-                        layoutInflater.inflate(R.layout.custom_dialog_title_profile, null)
-                    builder.setCustomTitle(customTitle)
+                    val view = layoutInflater.inflate(R.layout.user_profile_layout, null)
+                    val textView = view.findViewById<TextView>(R.id.profile_text)
+                    val imageView = view.findViewById<ImageView>(R.id.profile_image)
 
                     val name = snapshot.child("name").getValue(String::class.java) ?: "N/A"
                     val score = snapshot.child("score").getValue(String::class.java) ?: "N/A"
                     val stars = snapshot.child("stars").getValue(String::class.java) ?: "N/A"
                     val fastSequence =
                         snapshot.child("fast_sequence").getValue(String::class.java) ?: "N/A"
-
                     val times = snapshot.child("times").let {
                         when (it.value) {
                             is Long -> it.value.toString()
@@ -891,16 +890,17 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     val message = """
-    <font color="#808080">Username:<b></font> <font color="#FFFFFF">$name</font></b><br><br>
-    <font color="#808080">Score:<b></font> <font color="#FFFFFF">$score</font></b> <font color="#808080">pts</font><br><br>
-    <font color="#808080">Stars:<b></font> <font color="#FFFFFF">$stars</font></b><br><br>
-    <font color="#808080">Fast sequence ever:<b></font> <font color="#FFFFFF">$fastSequence</font></b> <font color="#808080">ms</font><br><br>
-    <font color="#808080">Times played:<b></font> <font color="#FFFFFF">$times</font></b>
-""".trimIndent()
+                    <font color="#FFFFFF"><b>$name</b></font><br>
+                    <font color="#808080">Score: $score </font><br><br>
+                    <font color="#808080">Stars: $stars </font><br>
+                    <font color="#808080">Fast sequence ever: $fastSequence ms</font><br>
+                    <font color="#808080">Times played: $times</font>
+                """.trimIndent()
+                    textView.text = Html.fromHtml(message)
 
+                    imageView.setImageResource(R.drawable.userprofile)
 
-                    builder.setMessage(Html.fromHtml(message))
-
+                    builder.setView(view)
                     builder.setNegativeButton("Close") { dialog, _ ->
                         dialog.dismiss()
                         Handler(Looper.getMainLooper()).post {
@@ -1027,7 +1027,8 @@ class MainActivity : AppCompatActivity() {
 
                 val passwordInput = EditText(this)
                 passwordInput.hint = "Password"
-                passwordInput.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                passwordInput.inputType =
+                    InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
                 inputLayout.addView(passwordInput)
 
                 builder.setView(inputLayout)
