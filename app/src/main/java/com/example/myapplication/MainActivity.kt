@@ -1014,12 +1014,10 @@ class MainActivity : AppCompatActivity() {
                 builder.setTitle("First time")
                 builder.setMessage("Do you want to join the Top 7 of Global Score?\n\nPlease provide some info about yourself.")
 
-                // Criação do layout para conter os EditTexts
                 val inputLayout = LinearLayout(this)
                 inputLayout.orientation = LinearLayout.VERTICAL
                 inputLayout.setPaddingRelative(50, 15, 50, 0)
 
-                // Criando os campos de texto
                 val emailInput = EditText(this)
                 emailInput.hint = "E-mail"
                 emailInput.inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
@@ -1045,7 +1043,6 @@ class MainActivity : AppCompatActivity() {
                     val passwordText = passwordInput.text.toString().trim()
                     val currentTimeMillis = System.currentTimeMillis()
 
-                    // Validação e salvamento de dados no Firebase
                     if (usernameText.isEmpty()) {
                         myRef.child("name").setValue("guest$currentTimeMillis")
                     } else {
