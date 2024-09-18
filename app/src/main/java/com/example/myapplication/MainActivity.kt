@@ -873,6 +873,7 @@ class MainActivity : AppCompatActivity() {
                 try {
                     val builder = AlertDialog.Builder(this@MainActivity)
                     val view = layoutInflater.inflate(R.layout.user_profile_layout, null)
+                    val textViewName = view.findViewById<TextView>(R.id.profile_name)
                     val textView = view.findViewById<TextView>(R.id.profile_text)
                     val imageView = view.findViewById<ImageView>(R.id.profile_image)
 
@@ -889,14 +890,19 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-                    val message = """
-                    <font color="#FFFFFF"><b>$name</b></font><br>
-                    <font color="#808080">Score: $score </font><br><br>
-                    <font color="#808080">Stars: $stars </font><br>
-                    <font color="#808080">Fast sequence ever: $fastSequence ms</font><br>
-                    <font color="#808080">Times played: $times</font>
+                    val messageName = """
+                    <font color="#FFFFFF"><b>$name</b></font>
                 """.trimIndent()
-                    textView.text = Html.fromHtml(message)
+
+                    textViewName.text = Html.fromHtml(messageName)
+
+                    val messageText = """
+                    <font color="#ADADAD">Score: $score </font><br><br>
+                    <font color="#ADADAD">Stars: $stars </font><br>
+                    <font color="#ADADAD">Fast sequence ever: $fastSequence ms</font><br>
+                    <font color="#ADADAD">Times played: $times</font>
+                """.trimIndent()
+                    textView.text = Html.fromHtml(messageText)
 
                     imageView.setImageResource(R.drawable.userprofile)
 
