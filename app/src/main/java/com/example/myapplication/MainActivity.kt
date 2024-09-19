@@ -98,12 +98,12 @@ class MainActivity : AppCompatActivity() {
         if (isonline(this)) {
             val tm = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
             val countryCodeValue = tm.networkCountryIso
-            savecountrycode(countryCodeValue)
             val ldt = LocalDateTime.now().toString()
             signInAnonymously()
             firsttime()
             devicename()
             getpublicipaddress()
+            savecountrycode(countryCodeValue)
             savedatetime(ldt)
             savetimes()
             checkVersion()
@@ -564,21 +564,26 @@ class MainActivity : AppCompatActivity() {
                 val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
                 val database = Firebase.database
                 val myRef = database.getReference("/data/$id")
+
                 myRef.child("times").addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val timesvalue = snapshot.value.toString()
-                        if (timesvalue.isNotEmpty()) {
-                            val num: Int = timesvalue.toInt()
-                            val result = num + 1
-                            myRef.child("times").setValue(result)
+                        val timesvalue = snapshot.value?.toString()
 
+                        if (!timesvalue.isNullOrEmpty() && timesvalue != "null") {
+                            try {
+                                val num: Int = timesvalue.toInt()
+                                val result = num + 1
+                                myRef.child("times").setValue(result)
+                            } catch (e: NumberFormatException) {
+                                Log.e("saveTimes", "Invalid number format: ${e.message}")
+                            }
                         } else {
-                            Log.e("DetailsFragment", "Value string is empty or null")
+                            Log.e("saveTimes", "Value is empty or null")
                         }
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        // Handle any errors or cancellation
+                        Log.e("saveTimes", "Database error: ${error.message}")
                     }
                 })
             } catch (e: Exception) {
@@ -1064,6 +1069,7 @@ class MainActivity : AppCompatActivity() {
                     myRef.child("stars").setValue("0")
                     myRef.child("fast_sequence").setValue("4000")
                     myRef.child("email").setValue("n/a")
+                    myRef.child("password").setValue("n/a")
 
                     dialog.cancel()
                 }
