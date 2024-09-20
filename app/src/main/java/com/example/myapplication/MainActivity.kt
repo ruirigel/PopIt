@@ -19,8 +19,6 @@ import android.os.Vibrator
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.text.Html
-import android.text.InputFilter
-import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -29,7 +27,6 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -1007,80 +1004,65 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("HardwareIds")
+    @SuppressLint("HardwareIds", "InflateParams")
     private fun askforusername() {
         if (isonline(this)) {
             try {
                 val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
                 val database = Firebase.database
                 val myRef = database.getReference("/data/$id")
+
+                // Inflate the custom layout
+                val view = layoutInflater.inflate(R.layout.user_registration_layout, null)
+
+                // Get the input fields from the inflated layout
+                val emailInput = view.findViewById<EditText>(R.id.email_input)
+                val usernameInput = view.findViewById<EditText>(R.id.username_input)
+                val passwordInput = view.findViewById<EditText>(R.id.password_input)
+
+                // Build the dialog with the custom view
                 val builder = AlertDialog.Builder(this)
-                builder.setCancelable(false)
-                builder.setTitle("First time")
-                builder.setMessage("Do you want to join the Top 7 of Global Score?\n\nPlease provide some info about yourself.")
+                    .setView(view)
+                    .setCancelable(false)
+                    .setPositiveButton("Submit") { _, _ ->
+                        val emailText = emailInput.text.toString().trim()
+                        val usernameText = usernameInput.text.toString().trim()
+                        val passwordText = passwordInput.text.toString().trim()
+                        val currentTimeMillis = System.currentTimeMillis()
 
-                val inputLayout = LinearLayout(this)
-                inputLayout.orientation = LinearLayout.VERTICAL
-                inputLayout.setPaddingRelative(50, 15, 50, 0)
-
-                val emailInput = EditText(this)
-                emailInput.hint = "E-mail"
-                emailInput.inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-                inputLayout.addView(emailInput)
-
-                val usernameInput = EditText(this)
-                usernameInput.hint = "Username"
-                usernameInput.filters = arrayOf(InputFilter.LengthFilter(15))
-                usernameInput.inputType = InputType.TYPE_CLASS_TEXT
-                inputLayout.addView(usernameInput)
-
-                val passwordInput = EditText(this)
-                passwordInput.hint = "Password"
-                passwordInput.inputType =
-                    InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-                inputLayout.addView(passwordInput)
-
-                builder.setView(inputLayout)
-
-                builder.setPositiveButton("Submit") { _, _ ->
-                    val emailText = emailInput.text.toString().trim()
-                    val usernameText = usernameInput.text.toString().trim()
-                    val passwordText = passwordInput.text.toString().trim()
-                    val currentTimeMillis = System.currentTimeMillis()
-
-                    if (usernameText.isEmpty()) {
-                        myRef.child("name").setValue("guest$currentTimeMillis")
-                    } else {
-                        myRef.child("name").setValue(usernameText)
+                        if (usernameText.isEmpty()) {
+                            myRef.child("name").setValue("guest$currentTimeMillis")
+                        } else {
+                            myRef.child("name").setValue(usernameText)
+                        }
+                        myRef.child("email").setValue(emailText.ifEmpty { "n/a" })
+                        myRef.child("password").setValue(passwordText.ifEmpty { "n/a" })
+                        myRef.child("score").setValue("0")
+                        myRef.child("times").setValue("1")
+                        myRef.child("stars").setValue("0")
+                        myRef.child("fast_sequence").setValue("4000")
                     }
-                    myRef.child("email").setValue(emailText.ifEmpty { "n/a" })
-                    myRef.child("password").setValue(passwordText.ifEmpty { "n/a" })
-                    myRef.child("score").setValue("0")
-                    myRef.child("times").setValue("1")
-                    myRef.child("stars").setValue("0")
-                    myRef.child("fast_sequence").setValue("4000")
-                }
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        val currentTimeMillis = System.currentTimeMillis()
+                        myRef.child("name").setValue("guest$currentTimeMillis")
+                        myRef.child("score").setValue("0")
+                        myRef.child("times").setValue("1")
+                        myRef.child("stars").setValue("0")
+                        myRef.child("fast_sequence").setValue("4000")
+                        myRef.child("email").setValue("n/a")
+                        myRef.child("password").setValue("n/a")
 
-                builder.setNegativeButton("Cancel") { dialog, _ ->
-                    val currentTimeMillis = System.currentTimeMillis()
-                    myRef.child("name").setValue("guest$currentTimeMillis")
-                    myRef.child("score").setValue("0")
-                    myRef.child("times").setValue("1")
-                    myRef.child("stars").setValue("0")
-                    myRef.child("fast_sequence").setValue("4000")
-                    myRef.child("email").setValue("n/a")
-                    myRef.child("password").setValue("n/a")
-
-                    dialog.cancel()
-                }
+                        dialog.cancel()
+                    }
 
                 val dialog = builder.create()
                 dialog.window?.decorView?.setBackgroundResource(R.drawable.dialog_background)
                 dialog.show()
+
                 dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
-                    .setTextColor(getResources().getColor(R.color.dialog_buttons))
+                    .setTextColor(resources.getColor(R.color.dialog_buttons))
                 dialog.getButton(DialogInterface.BUTTON_POSITIVE)
-                    .setTextColor(getResources().getColor(R.color.dialog_buttons))
+                    .setTextColor(resources.getColor(R.color.dialog_buttons))
 
             } catch (e: Exception) {
                 Log.e("askForUsername", "Error: ${e.message}")
