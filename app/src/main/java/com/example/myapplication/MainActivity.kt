@@ -563,6 +563,7 @@ class MainActivity : AppCompatActivity() {
         val userRef = rootRef.child("/data/$id")
 
         userRef.child("fast_sequence").addListenerForSingleValueEvent(object : ValueEventListener {
+            @SuppressLint("SetTextI18n")
             override fun onDataChange(snapshot: DataSnapshot) {
                 val fastSequence = snapshot.getValue(String::class.java)
 
@@ -627,7 +628,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("HardwareIds")
+    @SuppressLint("HardwareIds", "SetTextI18n")
     private fun saveFastSequence(newFastSequence: String) {
         if (isonline(this)) {
             try {
