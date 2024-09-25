@@ -105,6 +105,7 @@ class MainActivity : AppCompatActivity() {
             savetimes()
             checkVersion()
             monitorScores()
+            fetchFastSequence()
         } else {
             Toast.makeText(
                 this,
@@ -555,6 +556,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("HardwareIds")
+    private fun fetchFastSequence() {
+        val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        val rootRef = FirebaseDatabase.getInstance().reference
+        val userRef = rootRef.child("/data/$id")
+
+        userRef.child("fast_sequence").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val fastSequence = snapshot.getValue(String::class.java)
+
+                if (!fastSequence.isNullOrEmpty()) {
+                    val textView3: TextView = findViewById(R.id.textView3)
+                    textView3.text = "${fastSequence}ms"
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("fetchFastSequence", "Error fetching fast_sequence: ${error.message}")
+            }
+        })
+    }
+
+    @SuppressLint("HardwareIds")
     private fun savetimes() {
         if (isonline(this)) {
             try {
@@ -617,6 +640,8 @@ class MainActivity : AppCompatActivity() {
                         currentFastSequenceStr?.toDoubleOrNull() ?: Double.MAX_VALUE
                     val newFastSequenceValue = newFastSequence.toDoubleOrNull() ?: Double.MAX_VALUE
                     if (newFastSequenceValue < currentFastSequence) {
+                        val textView3: TextView = findViewById(R.id.textView3)
+                        textView3.text = "${newFastSequence}ms"
                         myRef.child("fast_sequence").setValue(newFastSequence)
                             .addOnSuccessListener {
                             }.addOnFailureListener { exception ->
@@ -886,11 +911,20 @@ class MainActivity : AppCompatActivity() {
                         snapshot.child("fast_sequence").getValue(String::class.java) ?: "N/A"
                     val times = snapshot.child("times").let {
                         when (it.value) {
-                            is Long -> it.value.toString()
-                            is String -> it.value
-                            else -> "N/A"
+                            is Long -> (it.value as Long).toInt()
+                            is String -> try {
+                                it.value.toString().toInt()
+                            } catch (e: NumberFormatException) {
+                                Log.e("UserProfileDialog", "Invalid times format: ${it.value}")
+                                0
+                            }
+
+                            else -> 0
                         }
                     }
+
+                    val reputation =
+                        ((score.toInt() * 0.5) + (stars.toInt() * 2) - (times * 0.2) + (1000 / fastSequence.toInt())).toInt()
 
                     val messageName = """
                     <font color="#FFFFFF"><b>$name</b></font>
@@ -901,6 +935,7 @@ class MainActivity : AppCompatActivity() {
                     val messageText = """
                     <font color="#ADADAD">Score: $score </font><br><br>
                     <font color="#ADADAD">Stars: $stars </font><br>
+                    <font color="#ADADAD">Reputation: $reputation </font><br>
                     <font color="#ADADAD">Fast sequence ever: $fastSequence ms</font><br>
                     <font color="#ADADAD">Times played: $times</font>
                 """.trimIndent()
@@ -1012,15 +1047,12 @@ class MainActivity : AppCompatActivity() {
                 val database = Firebase.database
                 val myRef = database.getReference("/data/$id")
 
-                // Inflate the custom layout
                 val view = layoutInflater.inflate(R.layout.user_registration_layout, null)
 
-                // Get the input fields from the inflated layout
                 val emailInput = view.findViewById<EditText>(R.id.email_input)
                 val usernameInput = view.findViewById<EditText>(R.id.username_input)
                 val passwordInput = view.findViewById<EditText>(R.id.password_input)
 
-                // Build the dialog with the custom view
                 val builder = AlertDialog.Builder(this)
                     .setView(view)
                     .setCancelable(false)
@@ -1038,19 +1070,21 @@ class MainActivity : AppCompatActivity() {
                         myRef.child("email").setValue(emailText.ifEmpty { "n/a" })
                         myRef.child("password").setValue(passwordText.ifEmpty { "n/a" })
                         myRef.child("score").setValue("0")
-                        myRef.child("times").setValue("1")
+                        myRef.child("times").setValue(1)
                         myRef.child("stars").setValue("0")
                         myRef.child("fast_sequence").setValue("4000")
+                        myRef.child("reputation").setValue("0")
                     }
                     .setNegativeButton("Cancel") { dialog, _ ->
                         val currentTimeMillis = System.currentTimeMillis()
                         myRef.child("name").setValue("guest$currentTimeMillis")
                         myRef.child("score").setValue("0")
-                        myRef.child("times").setValue("1")
+                        myRef.child("times").setValue(1)
                         myRef.child("stars").setValue("0")
                         myRef.child("fast_sequence").setValue("4000")
                         myRef.child("email").setValue("n/a")
                         myRef.child("password").setValue("n/a")
+                        myRef.child("reputation").setValue("0")
 
                         dialog.cancel()
                     }
