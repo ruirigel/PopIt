@@ -50,13 +50,14 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.UnknownHostException
 import java.time.LocalDateTime
 
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
-    private val currentVersion = 20240919
+    private val currentVersion = 20240925
 
     private var timer: CountDownTimer? = null
     private var composer = "Track: Trell Daniels - "
@@ -1362,6 +1363,17 @@ class MainActivity : AppCompatActivity() {
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {
+                    if (!hasActiveInternetConnection()) {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "No active internet connection.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        return@launch
+                    }
+
                     val url = URL(rawUrl)
                     val connection = url.openConnection() as HttpURLConnection
                     connection.requestMethod = "GET"
@@ -1394,6 +1406,14 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     connection.disconnect()
+                } catch (e: UnknownHostException) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Unable to resolve host. Please check your connection.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG)
@@ -1401,6 +1421,19 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun hasActiveInternetConnection(): Boolean {
+        return try {
+            val url = URL("https://clients3.google.com/generate_204")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "HEAD"
+            connection.connectTimeout = 2000
+            connection.readTimeout = 2000
+            connection.responseCode == 204
+        } catch (e: Exception) {
+            false
         }
     }
 
