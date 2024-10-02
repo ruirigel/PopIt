@@ -234,7 +234,8 @@
         android:id="@+id/button38"
         android:layout_width="150dp"
         android:layout_height="97dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginTop="44dp"
+        android:layout_marginEnd="3dp"
         android:backgroundTint="#3F51B4"
         android:tag="38"
         android:text="0"
@@ -246,8 +247,8 @@
         app:iconPadding="30dp"
         app:iconSize="35dp"
         app:iconTint="#2B2D30"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/center_guideline"
+        app:layout_constraintTop_toBottomOf="@+id/button35"
         tools:ignore="HardcodedText,DuplicateSpeakableTextCheck,TextContrastCheck" />
 
     <Button
@@ -255,15 +256,15 @@
         android:layout_width="50dp"
         android:layout_height="97dp"
         android:layout_marginStart="101dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginTop="44dp"
         android:backgroundTint="#5587ED"
         app:icon="@drawable/list"
         app:iconGravity="textEnd"
         app:iconPadding="0dp"
         app:iconSize="20dp"
         app:iconTint="#2B2D30"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/center_guideline"
+        app:layout_constraintTop_toBottomOf="@+id/button37"
         tools:ignore="SpeakableTextPresentCheck" />
 
     <Button
@@ -271,18 +272,18 @@
         android:layout_width="48dp"
         android:layout_height="45dp"
         android:layout_marginStart="24dp"
+        android:layout_marginTop="44dp"
         android:layout_marginEnd="24dp"
-        android:layout_marginBottom="75dp"
         android:backgroundTint="#009688"
         app:icon="@drawable/musical_note"
         app:iconGravity="textEnd"
         app:iconPadding="0dp"
         app:iconSize="20dp"
         app:iconTint="#2B2D30"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button39"
         app:layout_constraintHorizontal_bias="0.571"
         app:layout_constraintStart_toEndOf="@+id/button38"
+        app:layout_constraintTop_toBottomOf="@+id/button36"
         tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
     <Button
@@ -292,14 +293,12 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="6dp"
         android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
         android:backgroundTint="#4CAF50"
         app:icon="@drawable/musical_note1"
         app:iconGravity="textEnd"
         app:iconPadding="0dp"
         app:iconSize="20dp"
         app:iconTint="#2B2D30"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button39"
         app:layout_constraintHorizontal_bias="0.571"
         app:layout_constraintStart_toEndOf="@+id/button38"
@@ -319,6 +318,19 @@
         tools:ignore="HardcodedText" />
 
     <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="0"
+        android:textColor="#FF9800"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        app:layout_constraintStart_toEndOf="@+id/imageView2"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="HardcodedText" />
+
+    <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -327,6 +339,20 @@
         android:text="0"
         android:textColor="#009688"
         android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="4dp"
+        android:text="0"
+        android:textColor="#FF9800"
+        android:textStyle="bold"
+        android:visibility="invisible"
         app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="HardcodedText" />
@@ -361,7 +387,7 @@
         android:id="@+id/imageView3"
         android:layout_width="18dp"
         android:layout_height="18dp"
-        android:layout_marginStart="62dp"
+        android:layout_marginStart="59dp"
         android:layout_marginTop="5.5dp"
         android:contentDescription="TODO"
         app:layout_constraintStart_toStartOf="@+id/center_guideline"
@@ -379,6 +405,20 @@
         android:text="0"
         android:textColor="#009688"
         android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/imageView3"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="4dp"
+        android:text="0"
+        android:textColor="#FF9800"
+        android:textStyle="bold"
+        android:visibility="invisible"
         app:layout_constraintStart_toEndOf="@+id/imageView3"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="HardcodedText" />

@@ -27,6 +27,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -644,6 +645,20 @@ class MainActivity : AppCompatActivity() {
                     if (newFastSequenceValue < currentFastSequence) {
                         val textView3: TextView = findViewById(R.id.textView3)
                         textView3.text = "${newFastSequence}ms"
+                        val imageView3: ImageView = findViewById(R.id.imageView3)
+                        imageView3.startAnimation(
+                            AnimationUtils.loadAnimation(
+                                this,
+                                R.anim.fade_in_out_score
+                            )
+                        )
+                        textView3.startAnimation(
+                            AnimationUtils.loadAnimation(
+                                this,
+                                R.anim.fade_in_out_score
+                            )
+                        )
+
                         myRef.child("fast_sequence").setValue(newFastSequence)
                             .addOnSuccessListener {
                             }.addOnFailureListener { exception ->
@@ -652,6 +667,21 @@ class MainActivity : AppCompatActivity() {
                                     "Error updating value: ${exception.message}"
                                 )
                             }
+                    } else {
+                        val textView4: TextView = findViewById(R.id.textView4)
+                        textView4.text = "${newFastSequence}ms"
+                        textView4.startAnimation(
+                            AnimationUtils.loadAnimation(
+                                this,
+                                R.anim.move_down_fade_out
+                            )
+                        )
+                        textView4.startAnimation(
+                            AnimationUtils.loadAnimation(
+                                this,
+                                R.anim.move_down_fade_out
+                            )
+                        )
                     }
                 }.addOnFailureListener { exception ->
                     Log.e(
@@ -725,6 +755,21 @@ class MainActivity : AppCompatActivity() {
                                 textView1.setTextColor(Color.parseColor("#009688"))
                             }
 
+                            val textView5: TextView = findViewById(R.id.textView5)
+                            textView5.text = scorevaluenow
+                            textView5.startAnimation(
+                                AnimationUtils.loadAnimation(
+                                    this@MainActivity,
+                                    R.anim.move_down_fade_out
+                                )
+                            )
+                            textView5.startAnimation(
+                                AnimationUtils.loadAnimation(
+                                    this@MainActivity,
+                                    R.anim.move_down_fade_out
+                                )
+                            )
+
                             //delayscore(numanow, resultnow)
 
                         } else {
@@ -779,6 +824,21 @@ class MainActivity : AppCompatActivity() {
                             val finalresultstarsnow = resultstarsnow.toString()
                             textView2.text = finalresultstarsnow
 
+                            val textView6: TextView = findViewById(R.id.textView6)
+                            textView6.text = scorevaluestarsnow
+                            textView6.startAnimation(
+                                AnimationUtils.loadAnimation(
+                                    this@MainActivity,
+                                    R.anim.move_down_fade_out
+                                )
+                            )
+                            textView6.startAnimation(
+                                AnimationUtils.loadAnimation(
+                                    this@MainActivity,
+                                    R.anim.move_down_fade_out
+                                )
+                            )
+
                         } else {
                             Log.e("saveStars", "Value string is empty or null")
                         }
@@ -794,6 +854,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    data class UserScore(val name: String, val score: Int, val stars: Int, val fastSequence: Int)
+
     @SuppressLint("InflateParams")
     private fun showscore() {
         if (isonline(this)) {
@@ -801,73 +863,107 @@ class MainActivity : AppCompatActivity() {
                 val rootRef = FirebaseDatabase.getInstance().reference
                 val usersRef = rootRef.child("data")
                 val builder = AlertDialog.Builder(this)
-                val customTitle = layoutInflater.inflate(R.layout.custom_dialog_title, null)
-                builder.setCustomTitle(customTitle)
+
+                val customView = layoutInflater.inflate(R.layout.custom_dialog_title, null)
+                builder.setView(customView)
+
+                // Encontrar os botões
+                val btnFilterScore: Button = customView.findViewById(R.id.btn_filter_score)
+                val btnFilterStars: Button = customView.findViewById(R.id.btn_filter_stars)
+                val btnFilterFastSequence: Button =
+                    customView.findViewById(R.id.btn_filter_fast_sequence)
+
+                val scoreListView: ListView = customView.findViewById(R.id.score_list_view)
+
                 usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val namesList = mutableListOf<Pair<String, Int>>()
+                        val usersList = mutableListOf<UserScore>()
                         val nameToUserIdMap = mutableMapOf<String, String>()
 
                         for (userSnapshot in snapshot.children) {
                             val userId = userSnapshot.key
                             if (userSnapshot.child("name").exists() && userSnapshot.child("score")
-                                    .exists()
+                                    .exists() &&
+                                userSnapshot.child("stars")
+                                    .exists() && userSnapshot.child("fast_sequence").exists()
                             ) {
+
                                 val name = userSnapshot.child("name").getValue(String::class.java)
                                 val scoreStr =
                                     userSnapshot.child("score").getValue(String::class.java)
+                                val starsStr =
+                                    userSnapshot.child("stars").getValue(String::class.java)
+                                val fastSequenceStr =
+                                    userSnapshot.child("fast_sequence").getValue(String::class.java)
 
-                                if (name != null && scoreStr != null && userId != null) {
+                                if (name != null && scoreStr != null && starsStr != null && fastSequenceStr != null && userId != null) {
                                     val score = scoreStr.toIntOrNull() ?: 0
-                                    namesList.add(Pair(name, score))
+                                    val stars = starsStr.toIntOrNull() ?: 0
+                                    val fastSequence = fastSequenceStr.toIntOrNull() ?: 0
+
+                                    usersList.add(UserScore(name, score, stars, fastSequence))
                                     nameToUserIdMap[name] = userId
                                 }
                             }
                         }
 
-                        val sortedList = namesList.sortedByDescending { it.second }
-                        val top10List = sortedList.take(7)
+                        fun updateScoreList(filter: String) {
+                            val filteredList = when (filter) {
+                                "Score" -> usersList.sortedByDescending { it.score }
+                                "Stars" -> usersList.sortedByDescending { it.stars }
+                                "Fast Sequence" -> usersList.sortedBy { it.fastSequence }
+                                else -> usersList
+                            }.take(7)
 
-                        val adapter = object : ArrayAdapter<Pair<String, Int>>(
-                            this@MainActivity,
-                            R.layout.custom_list_item,
-                            top10List
-                        ) {
-                            override fun getView(
-                                position: Int,
-                                convertView: View?,
-                                parent: ViewGroup
-                            ): View {
-                                val view = convertView ?: layoutInflater.inflate(
-                                    R.layout.custom_list_item,
-                                    null
-                                )
+                            val scoreAdapter = object : ArrayAdapter<UserScore>(
+                                this@MainActivity,
+                                R.layout.custom_list_item,
+                                filteredList
+                            ) {
+                                override fun getView(
+                                    position: Int,
+                                    convertView: View?,
+                                    parent: ViewGroup
+                                ): View {
+                                    val view = convertView
+                                        ?: layoutInflater.inflate(R.layout.custom_list_item, null)
 
-                                val nameTextView = view.findViewById<TextView>(R.id.nameTextView)
-                                val scoreTextView = view.findViewById<TextView>(R.id.scoreTextView)
-                                val rankTextView = view.findViewById<TextView>(R.id.rankTextView)
+                                    val nameTextView =
+                                        view.findViewById<TextView>(R.id.nameTextView)
+                                    val scoreTextView =
+                                        view.findViewById<TextView>(R.id.scoreTextView)
+                                    val rankTextView =
+                                        view.findViewById<TextView>(R.id.rankTextView)
 
-                                val (name, score) = top10List[position]
+                                    val userScore = filteredList[position]
 
-                                nameTextView.text = name
-                                scoreTextView.text = getString(R.string.score_text, score)
-                                rankTextView.text = getString(R.string.rank_text, position + 1)
+                                    nameTextView.text = userScore.name
+                                    scoreTextView.text =
+                                        getString(R.string.score_text, userScore.score)
+                                    rankTextView.text = getString(R.string.rank_text, position + 1)
 
-                                return view
+                                    return view
+                                }
+                            }
+
+                            scoreListView.adapter = scoreAdapter
+
+                            scoreListView.setOnItemClickListener { _, _, position, _ ->
+                                val selectedName = filteredList[position].name
+                                val userId = nameToUserIdMap[selectedName]
+                                userId?.let { showUserProfileDialog(it) }
                             }
                         }
 
-                        builder.setAdapter(adapter) { _, which ->
-                            val selectedName = top10List[which].first
-                            val userId = nameToUserIdMap[selectedName]
-                            if (userId != null) {
-                                showUserProfileDialog(userId)
-                            }
-                        }
+                        // Definir ação para cada botão
+                        btnFilterScore.setOnClickListener { updateScoreList("Score") }
+                        btnFilterStars.setOnClickListener { updateScoreList("Stars") }
+                        btnFilterFastSequence.setOnClickListener { updateScoreList("Fast Sequence") }
 
-                        builder.setNegativeButton("Close") { dialog, _ ->
-                            dialog.cancel()
-                        }
+                        // Carregar lista inicial com "Score"
+                        updateScoreList("Score")
+
+                        builder.setNegativeButton("Close") { dialog, _ -> dialog.cancel() }
 
                         val dialog = builder.create()
                         dialog.window?.decorView?.setBackgroundResource(R.drawable.dialog_background)
@@ -892,6 +988,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     private fun showUserProfileDialog(userId: String) {
         val rootRef = FirebaseDatabase.getInstance().reference
         val userRef = rootRef.child("data").child(userId)
@@ -911,6 +1008,8 @@ class MainActivity : AppCompatActivity() {
                     val stars = snapshot.child("stars").getValue(String::class.java) ?: "N/A"
                     val fastSequence =
                         snapshot.child("fast_sequence").getValue(String::class.java) ?: "N/A"
+                    val awards = snapshot.child("awards").getValue(String::class.java) ?: "N/A"
+
                     val times = snapshot.child("times").let {
                         when (it.value) {
                             is Long -> (it.value as Long).toInt()
@@ -939,7 +1038,8 @@ class MainActivity : AppCompatActivity() {
                     <font color="#ADADAD">Stars: $stars </font><br>
                     <font color="#ADADAD">Reputation: $reputation </font><br>
                     <font color="#ADADAD">Fast sequence ever: $fastSequence ms</font><br>
-                    <font color="#ADADAD">Times played: $times</font>
+                    <font color="#ADADAD">Times played: $times</font><br>
+                    <font color="#ADADAD">Awards: $awards ms</font>
                 """.trimIndent()
                     textView.text = Html.fromHtml(messageText)
 
@@ -949,7 +1049,6 @@ class MainActivity : AppCompatActivity() {
                     builder.setNegativeButton("Close") { dialog, _ ->
                         dialog.dismiss()
                         Handler(Looper.getMainLooper()).post {
-                            showscore()
                         }
                     }
 
@@ -1076,6 +1175,8 @@ class MainActivity : AppCompatActivity() {
                         myRef.child("stars").setValue("0")
                         myRef.child("fast_sequence").setValue("4000")
                         myRef.child("reputation").setValue("0")
+                        myRef.child("awards").setValue("0")
+
                     }
                     .setNegativeButton("Cancel") { dialog, _ ->
                         val currentTimeMillis = System.currentTimeMillis()
@@ -1087,6 +1188,7 @@ class MainActivity : AppCompatActivity() {
                         myRef.child("email").setValue("n/a")
                         myRef.child("password").setValue("n/a")
                         myRef.child("reputation").setValue("0")
+                        myRef.child("awards").setValue("0")
 
                         dialog.cancel()
                     }
