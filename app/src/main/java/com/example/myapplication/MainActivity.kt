@@ -772,6 +772,8 @@ class MainActivity : AppCompatActivity() {
 
                             //delayscore(numanow, resultnow)
 
+                            saveReputation()
+
                         } else {
                             Log.e("saveScore", "Value string is empty or null")
 
@@ -854,7 +856,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    data class UserScore(val name: String, val score: Int, val stars: Int, val fastSequence: Int)
+    data class UserScore(
+        val name: String,
+        val score: Int,
+        val stars: Int,
+        val fastSequence: Int,
+        val awards: Int,
+        val reputation: Int,
+        val times: Int
+    )
 
     @SuppressLint("InflateParams")
     private fun showscore() {
@@ -867,11 +877,14 @@ class MainActivity : AppCompatActivity() {
                 val customView = layoutInflater.inflate(R.layout.custom_dialog_title, null)
                 builder.setView(customView)
 
-                // Encontrar os botões
                 val btnFilterScore: Button = customView.findViewById(R.id.btn_filter_score)
                 val btnFilterStars: Button = customView.findViewById(R.id.btn_filter_stars)
                 val btnFilterFastSequence: Button =
                     customView.findViewById(R.id.btn_filter_fast_sequence)
+                val btnFilterAwards: Button = customView.findViewById(R.id.btn_filter_awards)
+                val btnFilterReputation: Button =
+                    customView.findViewById(R.id.btn_filter_reputation)
+                val btnFilterTimes: Button = customView.findViewById(R.id.btn_filter_times)
 
                 val scoreListView: ListView = customView.findViewById(R.id.score_list_view)
 
@@ -895,13 +908,31 @@ class MainActivity : AppCompatActivity() {
                                     userSnapshot.child("stars").getValue(String::class.java)
                                 val fastSequenceStr =
                                     userSnapshot.child("fast_sequence").getValue(String::class.java)
+                                val awardsStr =
+                                    userSnapshot.child("awards").getValue(String::class.java)
+                                val reputationStr =
+                                    userSnapshot.child("reputation").getValue(String::class.java)
+                                val timesStr =
+                                    userSnapshot.child("times").getValue(Int::class.java)
 
-                                if (name != null && scoreStr != null && starsStr != null && fastSequenceStr != null && userId != null) {
+                                if (name != null && scoreStr != null && starsStr != null && fastSequenceStr != null && awardsStr != null && reputationStr != null && timesStr != null && userId != null) {
                                     val score = scoreStr.toIntOrNull() ?: 0
                                     val stars = starsStr.toIntOrNull() ?: 0
                                     val fastSequence = fastSequenceStr.toIntOrNull() ?: 0
-
-                                    usersList.add(UserScore(name, score, stars, fastSequence))
+                                    val awards = awardsStr.toIntOrNull() ?: 0
+                                    val reputation = reputationStr.toIntOrNull() ?: 0
+                                    val times = timesStr
+                                    usersList.add(
+                                        UserScore(
+                                            name,
+                                            score,
+                                            stars,
+                                            fastSequence,
+                                            awards,
+                                            reputation,
+                                            times
+                                        )
+                                    )
                                     nameToUserIdMap[name] = userId
                                 }
                             }
@@ -912,6 +943,10 @@ class MainActivity : AppCompatActivity() {
                                 "Score" -> usersList.sortedByDescending { it.score }
                                 "Stars" -> usersList.sortedByDescending { it.stars }
                                 "Fast Sequence" -> usersList.sortedBy { it.fastSequence }
+                                "Awards" -> usersList.sortedByDescending { it.awards }
+                                "Reputation" -> usersList.sortedByDescending { it.reputation }
+                                "Times" -> usersList.sortedByDescending { it.times }
+
                                 else -> usersList
                             }.take(7)
 
@@ -955,13 +990,56 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
 
-                        // Definir ação para cada botão
-                        btnFilterScore.setOnClickListener { updateScoreList("Score") }
-                        btnFilterStars.setOnClickListener { updateScoreList("Stars") }
-                        btnFilterFastSequence.setOnClickListener { updateScoreList("Fast Sequence") }
+                        fun toggleButton(selectedButton: Button) {
+                            val buttons =
+                                listOf(
+                                    btnFilterScore,
+                                    btnFilterStars,
+                                    btnFilterFastSequence,
+                                    btnFilterAwards,
+                                    btnFilterReputation,
+                                    btnFilterTimes
+                                )
 
-                        // Carregar lista inicial com "Score"
+                            for (button in buttons) {
+                                if (button == selectedButton) {
+                                    button.setBackgroundColor(Color.parseColor("#4CAF50"))
+                                    button.setTextColor(Color.BLACK)
+                                } else {
+                                    button.setBackgroundColor(Color.parseColor("#009688"))
+                                    button.setTextColor(Color.BLACK)
+                                }
+                            }
+                        }
+
+                        btnFilterScore.setOnClickListener {
+                            toggleButton(btnFilterScore)
+                            updateScoreList("Score")
+                        }
+                        btnFilterStars.setOnClickListener {
+                            toggleButton(btnFilterStars)
+                            updateScoreList("Stars")
+                        }
+                        btnFilterFastSequence.setOnClickListener {
+                            toggleButton(btnFilterFastSequence)
+                            updateScoreList("Fast Sequence")
+                        }
+                        btnFilterAwards.setOnClickListener {
+                            toggleButton(btnFilterAwards)
+                            updateScoreList("Awards")
+                        }
+                        btnFilterReputation.setOnClickListener {
+                            toggleButton(btnFilterReputation)
+                            updateScoreList("Reputation")
+                        }
+                        btnFilterTimes.setOnClickListener {
+                            toggleButton(btnFilterTimes)
+                            updateScoreList("Times")
+                        }
+
                         updateScoreList("Score")
+
+                        toggleButton(btnFilterScore)
 
                         builder.setNegativeButton("Close") { dialog, _ -> dialog.cancel() }
 
@@ -1008,8 +1086,9 @@ class MainActivity : AppCompatActivity() {
                     val stars = snapshot.child("stars").getValue(String::class.java) ?: "N/A"
                     val fastSequence =
                         snapshot.child("fast_sequence").getValue(String::class.java) ?: "N/A"
+                    val reputation =
+                        snapshot.child("reputation").getValue(String::class.java) ?: "N/A"
                     val awards = snapshot.child("awards").getValue(String::class.java) ?: "N/A"
-
                     val times = snapshot.child("times").let {
                         when (it.value) {
                             is Long -> (it.value as Long).toInt()
@@ -1024,9 +1103,6 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-                    val reputation =
-                        ((score.toInt() * 0.5) + (stars.toInt() * 2) - (times * 0.2) + (1000 / fastSequence.toInt())).toInt()
-
                     val messageName = """
                     <font color="#FFFFFF"><b>$name</b></font>
                 """.trimIndent()
@@ -1036,10 +1112,10 @@ class MainActivity : AppCompatActivity() {
                     val messageText = """
                     <font color="#ADADAD">Score: $score </font><br><br>
                     <font color="#ADADAD">Stars: $stars </font><br>
-                    <font color="#ADADAD">Reputation: $reputation </font><br>
                     <font color="#ADADAD">Fast sequence ever: $fastSequence ms</font><br>
-                    <font color="#ADADAD">Times played: $times</font><br>
-                    <font color="#ADADAD">Awards: $awards ms</font>
+                    <font color="#ADADAD">Awards: $awards</font><br>
+                    <font color="#ADADAD">Reputation: $reputation </font><br>
+                    <font color="#ADADAD">Times played: $times</font>
                 """.trimIndent()
                     textView.text = Html.fromHtml(messageText)
 
@@ -1066,6 +1142,45 @@ class MainActivity : AppCompatActivity() {
 
             override fun onCancelled(error: DatabaseError) {
                 Log.e("showUserProfileDialog", "Error accessing user data: ${error.message}")
+            }
+        })
+    }
+
+    @SuppressLint("HardwareIds")
+    fun saveReputation() {
+        val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        val rootRef = FirebaseDatabase.getInstance().reference
+        val usersRef = rootRef.child("/data/$id")
+
+        usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            @SuppressLint("InflateParams")
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val score = snapshot.child("score").getValue(String::class.java) ?: "N/A"
+                val stars = snapshot.child("stars").getValue(String::class.java) ?: "N/A"
+                val fastSequence =
+                    snapshot.child("fast_sequence").getValue(String::class.java) ?: "N/A"
+                val times = snapshot.child("times").let {
+                    when (it.value) {
+                        is Long -> (it.value as Long).toInt()
+                        is String -> try {
+                            it.value.toString().toInt()
+                        } catch (e: NumberFormatException) {
+                            Log.e("saveReputation", "Invalid times format: ${it.value}")
+                            0
+                        }
+
+                        else -> 0
+                    }
+                }
+
+                val reputationsvalues =
+                    ((score.toInt() * 0.5) + (stars.toInt() * 2) - (times * 0.2) + (1000 / fastSequence.toInt())).toInt()
+                usersRef.child("reputation").setValue(reputationsvalues.toString())
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("saveReputation", "Error accessing user data: ${error.message}")
             }
         })
     }
