@@ -1,0 +1,38 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/congratulations_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Congratulations, you are the winner!"
+        android:textSize="18sp"
+        android:textColor="#009688"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"
+        tools:ignore="HardcodedText" />
+
+    <ImageView
+        android:id="@+id/gift_card_image"
+        android:layout_width="200dp"
+        android:layout_height="150dp"
+        android:src="@drawable/roblox_gift_card"
+        android:contentDescription="Roblox Gift Card"
+        android:scaleType="fitCenter"
+        android:layout_marginBottom="16dp"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btn_claim_prize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Redeeming Prize"
+        android:textColor="@color/black"
+        android:backgroundTint="#009688"
+        tools:ignore="HardcodedText" />
+</LinearLayout>

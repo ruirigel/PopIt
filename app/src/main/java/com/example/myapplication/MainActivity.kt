@@ -3,12 +3,16 @@ package com.example.myapplication
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Color
 import android.media.MediaPlayer
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -58,7 +62,7 @@ import java.time.LocalDateTime
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
-    private val currentVersion = 20240925
+    private val currentVersion = 20241006
 
     private var timer: CountDownTimer? = null
     private var composer = "Track: Trell Daniels - "
@@ -659,6 +663,8 @@ class MainActivity : AppCompatActivity() {
                             )
                         )
 
+                        compareScoresAndSequences(id, newFastSequence)
+
                         myRef.child("fast_sequence").setValue(newFastSequence)
                             .addOnSuccessListener {
                             }.addOnFailureListener { exception ->
@@ -1183,6 +1189,208 @@ class MainActivity : AppCompatActivity() {
                 Log.e("saveReputation", "Error accessing user data: ${error.message}")
             }
         })
+    }
+
+    private fun compareScoresAndSequences(id: String, newFastSequence: String) {
+        val rootRef = FirebaseDatabase.getInstance().reference
+        val userRef = rootRef.child("data").child(id)
+        val giftRef =
+            rootRef.child("data/winners/gift")
+
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(userSnapshot: DataSnapshot) {
+                if (userSnapshot.exists()) {
+                    val score = userSnapshot.child("score").getValue(String::class.java)
+                        ?: "0"
+                    val stars = userSnapshot.child("stars").getValue(String::class.java)
+                        ?: "0"
+                    val reputation = userSnapshot.child("reputation").getValue(String::class.java)
+                        ?: "0"
+                    val times = userSnapshot.child("times").getValue(Int::class.java)
+                        ?: 0
+
+                    giftRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(giftSnapshot: DataSnapshot) {
+                            if (giftSnapshot.exists()) {
+                                val minScore =
+                                    giftSnapshot.child("minscore").getValue(String::class.java)
+                                        ?: "0"
+                                val minFastSequence = giftSnapshot.child("minfastsequence")
+                                    .getValue(String::class.java) ?: "0"
+                                val minReputation = giftSnapshot.child("minreputation")
+                                    .getValue(String::class.java) ?: "0"
+                                val minStars = giftSnapshot.child("minstars")
+                                    .getValue(String::class.java) ?: "0"
+                                val minTimesPlayed = giftSnapshot.child("mintimesplayed")
+                                    .getValue(String::class.java) ?: "0"
+                                val sent = giftSnapshot.child("sent").getValue(Boolean::class.java)
+                                    ?: false
+
+                                try {
+                                    val userScoreInt = score.toInt()
+                                    val minScoreInt = minScore.toInt()
+                                    val newFastSequenceInt = newFastSequence.toInt()
+                                    val minFastSequenceInt = minFastSequence.toInt()
+                                    val userStarsInt = stars.toInt()
+                                    val userReputationInt = reputation.toInt()
+                                    val userTimesInt = times
+                                    val minStarsInt = minStars.toInt()
+                                    val minReputationInt = minReputation.toInt()
+                                    val minTimesPlayedInt = minTimesPlayed.toInt()
+
+                                    if (userScoreInt > minScoreInt && newFastSequenceInt < minFastSequenceInt && userStarsInt > minStarsInt && userReputationInt > minReputationInt && userTimesInt > minTimesPlayedInt && !sent) {
+                                        showWinnerDialog(id)
+                                    }
+                                } catch (e: NumberFormatException) {
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "Error of conversion of values.",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            } else {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Gift data not found.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Error retrieving gift data: ${error.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    })
+                } else {
+                    Toast.makeText(this@MainActivity, "User data not found.", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Error retrieving user data: ${error.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
+    }
+
+    @SuppressLint("SetTextI18n", "HardwareIds")
+    fun showWinnerDialog(id: String) {
+        val builder = AlertDialog.Builder(this)
+
+        val customView = layoutInflater.inflate(R.layout.dialog_winner, null)
+        builder.setView(customView)
+
+        val giftCardImageView: ImageView = customView.findViewById(R.id.gift_card_image)
+        giftCardImageView.setImageResource(R.drawable.roblox_gift_card)
+
+        val dialog = builder.create()
+
+        val rootRef = FirebaseDatabase.getInstance().reference
+        val userRef = rootRef.child("data").child(id)
+
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val email = snapshot.child("email").getValue(String::class.java) ?: ""
+                    val winnerName = snapshot.child("name").getValue(String::class.java) ?: ""
+                    val currentAwards = snapshot.child("awards").getValue(String::class.java) ?: ""
+                    val newAwards = currentAwards.toInt() + 1
+                    userRef.child("awards").setValue(newAwards.toString())
+
+                    val giftRef = rootRef.child("data/winners/gift")
+                    giftRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(giftSnapshot: DataSnapshot) {
+                            if (giftSnapshot.exists()) {
+                                val giftCardCode =
+                                    giftSnapshot.child("code").getValue(String::class.java) ?: ""
+
+                                val messageTextView: TextView =
+                                    customView.findViewById(R.id.congratulations_message)
+                                messageTextView.text =
+                                    "Congratulations $winnerName, you won a gift card!"
+
+                                val winnersRef = rootRef.child("data/winners").child(id).push()
+                                val winnerData = mapOf(
+                                    "winner" to winnerName,
+                                    "email" to email,
+                                    "date" to LocalDateTime.now().toString(),
+                                    "code" to giftCardCode
+                                )
+                                winnersRef.setValue(winnerData)
+
+                                giftRef.child("sent").setValue(true)
+
+                                val claimPrizeButton: Button =
+                                    customView.findViewById(R.id.btn_claim_prize)
+                                claimPrizeButton.setOnClickListener {
+                                    val clipboard =
+                                        getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                    val clip = ClipData.newPlainText("Gift Card Code", giftCardCode)
+                                    clipboard.setPrimaryClip(clip)
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "Card code copied to clipboard!",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    redirectToRobloxRedeem(giftCardCode)
+                                    dialog.dismiss()
+                                }
+                            } else {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Gift not found in the database.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Error retrieving gift card code: ${error.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    })
+                } else {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Winner not found in the database.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Error retrieving user data: ${error.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
+
+        dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
+        dialog.show()
+    }
+
+    private fun redirectToRobloxRedeem(giftCardCode: String) {
+        val robloxRedeemUrl = "https://www.roblox.com/redeem?code=$giftCardCode"
+
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(robloxRedeemUrl))
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "No browser applications installed.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     @SuppressLint("HardwareIds")
