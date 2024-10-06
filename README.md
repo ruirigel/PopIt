@@ -13,6 +13,7 @@ This repository hosts the public releases. The releases(apk) are signed that you
 * Score board: To compete with other users online.
 * User profile: To view more details about the specific user.
 * Modern Interface: Interesting for casual users, offering an affordable and friendly interface.
+* Awards: Occasionally there will be prizes in the app for you to redeem.
 # preview of last release
 <img src="./userregistration.jpg" width=30% height=30%> <img src="./popit.jpg" width=30% height=30%> <img src="./scoreboard.jpg" width=30% height=30%> <img src="./userprofile.jpg" width=30% height=30%>
 # popit-requirements
