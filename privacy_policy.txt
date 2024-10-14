@@ -1,7 +1,7 @@
 # Privacy Policy for Popit
 At Popit, one of our main priorities is the privacy of our visitors. This Privacy Policy document outlines the types of information that are collected and recorded by Popit, and how we use it. If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us.
 
-This Privacy Policy applies only to our online activities and is valid for visitors to our website with regards to the information that they shared and/or collect in Popit. This policy does not apply to any information collected offline or via channels other than this website. Our Privacy Policy was created with the help of the Free Privacy Policy Generator.
+This Privacy Policy applies only to our online activities and is valid for visitors to our app Popit with regards to the information that they shared and/or collect in Popit. This policy does not apply to any information collected offline or via channels other than this website. Our Privacy Policy was created with the help of the Free Privacy Policy Generator.
 
 # Information We Collect
 Information You Provide: When you register on the site or in app, participate in surveys or use the site as a collaborator, we may ask for personal information such as your email address, name, profile details, and other relevant data.
