@@ -1,0 +1,24 @@
+# Privacy Policy for Popit
+At Popit, one of our main priorities is the privacy of our visitors. This Privacy Policy document outlines the types of information that are collected and recorded by Popit, and how we use it. If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us.
+
+This Privacy Policy applies only to our online activities and is valid for visitors to our app Popit with regards to the information that they shared and/or collect in Popit. This policy does not apply to any information collected offline or via channels other than this website. Our Privacy Policy was created with the help of the Free Privacy Policy Generator.
+
+# Information We Collect
+Information You Provide: When you register on the site or in app, participate in surveys or use the site as a collaborator, we may ask for personal information such as your email address, name, profile details, and other relevant data.
+Information We Collect Automatically: We collect information as you browse the site or app, IP address, and usage details. This data helps us improve services and monitor for fraud or inappropriate behavior.
+The personal information that you are asked to provide, and the reasons why, will be made clear at the time of the request.
+If you contact us directly, we may collect additional information such as your name, email address, phone number, and any other details you provide in your message.
+When you register for an account, we may ask for your contact information, such as your name, email address.
+
+# How We Use the Information Collected
+We use your personal information, information that you submitted in the app, for the following purposes:
+Service and Security: To operate the app, provide quality service, and verify your identity.
+Improvement: To enhance our services and understand user preferences.
+Security: To ensure marketplace integrity and prevent fraud.
+Communication: To contact you, as requested or as approved, for support or promotional activities.
+
+# Data Retention
+We retain personal information only as long as necessary for operational purposes, such as record-keeping for complaints, legal compliance, fraud prevention, and dispute resolution. Information from closed accounts may be kept to comply with applicable laws.
+
+# Children's Information
+Protecting children’s privacy is a priority. Popit does not knowingly collect Personal Identifiable Information from children under 13. If you believe that your child has provided such information, please contact us, and we will promptly remove it from our records.
