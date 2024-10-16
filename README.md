@@ -17,5 +17,5 @@ This repository hosts the public releases. The releases(apk) are signed that you
 # preview of pre-release
 <img src="./userregistration.jpg" width=30% height=30%> <img src="./popit.jpg" width=30% height=30%> <img src="./scoreboard.jpg" width=30% height=30%> <img src="./userprofile.jpg" width=30% height=30%> <img src="./awards.jpg" width=30% height=30%>
 # popit-requirements
-Android 10+
+Android 8.0+
 
