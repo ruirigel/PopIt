@@ -18,4 +18,7 @@ This repository hosts the public releases. The releases(apk) are signed that you
 <img src="./userregistration.jpg" width=30% height=30%> <img src="./popit.jpg" width=30% height=30%> <img src="./scoreboard.jpg" width=30% height=30%> <img src="./userprofile.jpg" width=30% height=30%> <img src="./awards.jpg" width=30% height=30%>
 # popit-requirements
 Android 8.0+
+# Google Play
+There is currently a build of Popit available on Google Play.
+https://play.google.com/store/apps/details?id=com.rmrbranco.popit
 
