@@ -14,7 +14,7 @@ This repository hosts the public releases. The releases(apk) are signed that you
 * User profile: To view more details about the specific user.
 * Modern Interface: Interesting for casual users, offering an affordable and friendly interface.
 * Awards: Occasionally there will be prizes in the app for you to redeem.
-# preview of pre-release
+# preview of pre-releases
 <img src="./userregistration.jpg" width=30% height=30%> <img src="./popit.jpg" width=30% height=30%> <img src="./scoreboard.jpg" width=30% height=30%> <img src="./userprofile.jpg" width=30% height=30%> <img src="./awards.jpg" width=30% height=30%>
 # popit-requirements
 Android 8.0+
