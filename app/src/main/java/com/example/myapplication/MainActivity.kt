@@ -61,7 +61,6 @@ import java.net.URL
 import java.net.UnknownHostException
 import java.time.LocalDateTime
 
-
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
@@ -114,7 +113,7 @@ class MainActivity : AppCompatActivity() {
                 val countryCodeValue = tm.networkCountryIso
                 val ldt = LocalDateTime.now().toString()
                 signInAnonymously()
-                firsttime()
+
                 devicename()
                 getpublicipaddress()
                 savecountrycode(countryCodeValue)
@@ -1584,15 +1583,20 @@ class MainActivity : AppCompatActivity() {
                     val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
                     val database = Firebase.database
                     val myRef = database.getReference("/data/$id")
-                    myRef.child("name").addListenerForSingleValueEvent(object : ValueEventListener {
+                    myRef.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             if (!snapshot.exists()) {
                                 askforusername()
+                            } else {
+                                val name = snapshot.child("name").getValue(String::class.java)
+                                if (name.isNullOrEmpty()) {
+                                    askforusername()
+                                }
                             }
                         }
 
                         override fun onCancelled(error: DatabaseError) {
-                            // Handle any errors or cancellation
+
                         }
                     })
                 } catch (e: Exception) {
@@ -1896,6 +1900,7 @@ class MainActivity : AppCompatActivity() {
                     Log.d(TAG, "signInAnonymously:success")
                     val user = auth.currentUser
                     updateUI(user)
+                    firsttime()
                 } else {
                     Log.w(TAG, "signInAnonymously:failure", task.exception)
                     Toast.makeText(
