@@ -1,5 +1,6 @@
 Privacy Policy - PopIt
 
+
 1. Information We Collect
 
 PopIt collects the following information to improve the user experience:
@@ -9,6 +10,7 @@ Usage data: information about user interactions with the game (scores, play time
 Device information: such as device type, operating system version, and unique device identifiers.
 
 Network data: information related to the internet connection, such as IP address.
+
 
 2. How We Use Your Information
 
@@ -34,13 +36,16 @@ Necessary to protect the rights, property, or safety of PopIt or its users.
 
 We implement security measures to protect the data stored in our application. However, no security system is foolproof, and we cannot guarantee the absolute security of your information.
 
+
 5. Your Rights
 
 You have the right to access, correct, or delete your personal data. Contact us if you have any questions or requests regarding your data.
 
+
 6. Changes to the Privacy Policy
 
 We may update this policy from time to time. We will notify you of any significant changes through the application or other appropriate communication channels.
+
 
 7. Contact
 
