@@ -4,7 +4,7 @@
 This game is nothing more than a sketch than I imagined based on physical bubble fidget toys while trying the kotlin language.<br>
 PopIt is a simple anti-stress game with wonderful Lofi beats in the background while you generate sequences of bubbles where you earns points by clicking on them, when you're ready and want more action you have the possibility to compete with other users online due to the existence of a score board.
 # popit-releases
-This repository hosts the public releases. The releases(apk) are signed that you can deploy to a device.
+This repository hosts the public pre-releases. The pre-releases(apk) are signed that you can deploy to a device. Later, as soon as the new features are implemented and tested, the pre-releases will be released on Google Play.
 # popit-features
 * Minimalist design: The use of solid colors with little variation of details suggests a clean and direct style.
 * Simple geometrical forms: All interactive elements are circles, which contributes to an easy to understand and focused interface on direct interactions.
